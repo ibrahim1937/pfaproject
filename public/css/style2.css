@@ -1,0 +1,46 @@
+.classeService {
+    padding-top: 50px;
+    /*padding-right: 200px;*/
+}
+
+#classeAform, #filiereAform {
+    border: 2px solid #47748b;
+    border-radius: 20px;
+    width: 60%;
+    margin-left:  200px;;
+    align-items: center;
+}
+#classeAform div, #filiereAform div {
+    padding: 0px 10px;
+    
+}
+.inline {
+    display: inline-block;
+}
+
+#classeAform, #filiereAform {
+    padding: 5px;
+}
+#classeAform > div > button , #filiereAform > div > button{
+    margin-bottom: 10px;
+    display: block;
+    margin: auto;
+}
+
+
+.container {
+    float: right;
+}
+
+.tablecontainer {
+    position: relative;
+    width: 60%;
+    margin: auto;
+    padding: 10px 0px;
+}
+.linksuppr {
+    text-decoration: none;
+    color: white;
+}
+
+
