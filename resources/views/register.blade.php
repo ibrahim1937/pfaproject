@@ -72,11 +72,11 @@
                                 <div class="form-group">
                                     <select class="form-control" aria-label="Default select example" style="border-radius: 20px;" name="roles" value="{{ old('roles') }}">
                                         <option value="" selected>Selectionner un role</option>
-                                        <option value="admin">Admin</option>
-                                        <option value="etudiant">Etudiant</option>
-                                        <option value="professeur">Professeur</option>
-                                        <option value="ess">Employeé services de scolarité</option>
-                                        <option value="ese">Employeé Services d'examen</option>
+                                        
+                                         
+                                            @foreach ($roles as $role)
+                                                <option value="{{ $role->id }}">{{ $role->nom }}</option>
+                                            @endforeach
                                     </select>
                                     <span class="text-danger">@error('roles')
                                         {{ $message }}
@@ -116,6 +116,7 @@
                             <div class="text-center">
                                 <a class="small" href="login.html">Already have an account? Login!</a>
                             </div>
+                        
                         </div>
                     </div>
                 </div>

@@ -11,6 +11,8 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
+    protected $table = "users";
+
     /**
      * The attributes that are mass assignable.
      *
@@ -21,8 +23,12 @@ class User extends Authenticatable
         'prenom',
         'email',
         'password',
+        'cin',
+        'photo',
+        'role_id',
     ];
 
+    
     /**
      * The attributes that should be hidden for arrays.
      *
@@ -38,7 +44,20 @@ class User extends Authenticatable
      *
      * @var array
      */
+    /*
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+    */
+
+    public function admin(){
+        return $this->hasMany(Admin::class);
+    }
+    public function etudiant(){
+        return $this->hasMany(Etudiant::class);
+    }
+    public function demande(){
+        return $this->hasMany(Demande::class);
+    }
+
 }

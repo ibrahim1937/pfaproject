@@ -11,34 +11,38 @@ class LoginController extends Controller
     public function login(Request $request){
 
         $request->validate([
-            'email' => 'required',
-            'password' => 'required',
+            'email' => 'required|email',
+            'password' => 'required|min:5',
         ]);
         
         $user = User::where('email','=',$request->email)->first();
 
-        $credentials = $request->only('email', 'password');
-
-        if(Auth::attempt($credentials)){
-            Auth::login(User::find($user->id), true);
-            // TODO enter users by roles
-            if($user->role == 'admin'){
-                return redirect('/admin/dashboard');
-            } elseif($user->role == 'etudiant'){
-                return redirect('/etudiant/dashboard');
-            }
-            elseif($user->role == 'professeur'){
-                return redirect('/ens/dashboard');
-            }
-            elseif($user->role == 'ess'){
-                return redirect('/service_de_scolarite/dashboard');
-            }
-            elseif($user->role == 'ese'){
-                return redirect('/service_examen/dashboard');
+        
+        if($user){
+            /* there is a user found in the database*/
+            $credentials = $request->only('email', 'password');
+            if(Auth::attempt($credentials)){
+                Auth::login(User::find($user->id), true);
+                if($user->role_id == 1){
+                    return redirect()->route('admin.dashboard');
+                } elseif($user->role_id == 5){
+                    return redirect()->route('etudiant.dashboard');
+                }
+                elseif($user->role_id == 2){
+                    return redirect()->route("prof.dashboard");
+                }
+                elseif($user->role_id == 3){
+                    return redirect()->route('ess.dashboard');
+                }
+                elseif($user->role_id == 4){
+                    return redirect()->route('ese.dashboard');
+                }
+            } else {
+                return back()->with('fail',"Votre mot de passe n'est pas correcte");
             }
             
         } else {
-            return back()->with('fail','Veuillez saisir des informations correctes');
+            return back()->with('fail','On a pas trouver le compte');
         }
 
 
