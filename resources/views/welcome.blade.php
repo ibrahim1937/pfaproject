@@ -38,7 +38,12 @@
           <li><a class="nav-link scrollto active" href="#hero">Home</a></li>
           <li><a class="nav-link scrollto" href="#about">À propos</a></li>
           <li><a class="nav-link scrollto" href="#team">Équipe</a></li>
-          <li><a class="getstarted scrollto" href="{{ route('loginpage') }}">S'identifier</a></li>
+          @guest
+           <li><a class="getstarted scrollto" href="{{ route('loginpage') }}">S'identifier</a></li>
+          @endguest
+          @auth
+            <li><a class="getstarted scrollto" href="{{ route('route') }}">Dahboard</a></li>
+          @endauth
         </ul>
         <i class="bi bi-list mobile-nav-toggle"></i>
       </nav><!-- .navbar -->

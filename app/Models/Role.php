@@ -8,4 +8,10 @@ use Illuminate\Database\Eloquent\Model;
 class Role extends Model
 {
     use HasFactory;
+
+    protected $table = 'roles';
+
+    public function categorie_demande(){
+        return $this->hasMany(CategorieDemande::class);
+    }
 }

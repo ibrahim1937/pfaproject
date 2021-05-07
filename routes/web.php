@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\MailController;
+use App\Http\Controllers\MainController;
 use App\Mail\StyledMail;
 
 /*
@@ -36,6 +37,7 @@ Route::post('/logout', function(){
 
 Route::post('/login',[LoginController::class, 'login'])->name('login');
 Route::post('/register',[MainController::class, 'register'])->name('register');
+Route::get('/routing',[MainController::class, 'routing'])->name('route');
 
 
 /* This route group is where the authenticated users go to */

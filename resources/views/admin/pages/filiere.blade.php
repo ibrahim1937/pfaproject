@@ -27,10 +27,10 @@
                     @endif
                     @csrf
                     <div class="form-row">
-                        <div class="col-sm-11 col-lg-5">
+                        <div class="col-sm-11 col-lg-5 codecontainer">
                             <input type="text" class="form-control m-3" placeholder="Code" id="code" name="code">
                         </div>
-                        <div class="col-sm-11 col-lg-6">
+                        <div class="col-sm-11 col-lg-6 libellecontainer">
                             <input type="text" class="form-control m-3" placeholder="Libelle" id="libelle" name="libelle">
                         </div>
                     </div>
