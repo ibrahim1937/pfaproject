@@ -40,7 +40,6 @@ $(document).ready(function(){
                     hideerrormessage();
                     if(data.error){
                         hideErrorsAfterSubmit();
-                        messagesHandler($('.errorcontainer'), 'fail');
                         errorHandler(data.error);
     
                     } else {
@@ -153,7 +152,6 @@ $(document).ready(function(){
                         hideErrorsAfterSubmit('modifier');
                         hideerrormessage();
                         errorHandler(data.error, 'modifierform');
-                        messagesHandler($('.errorparent'), 'fail');
                         console.log(data.error);
                     }else {
                         fillAll('.display',$('#content-agente'), data.data);

@@ -39,7 +39,6 @@ $(document).ready(function() {
                 hideerrormessage();
                 if (data.error) {
                     hideErrorsAfterSubmit();
-                    messagesHandler($(".errorcontainer"), "fail");
                     errorHandler(data.error);
                 } else {
                     fillAll(".display", $("#content-prof"), data);
