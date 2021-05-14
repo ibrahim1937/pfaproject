@@ -9,6 +9,7 @@ use App\Mail\TestMail;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
+use App\Models\Log;
 use App\Models\Professeur;
 use App\Models\AgentScolarite;
 use App\Models\AgentExamen;
@@ -16,6 +17,8 @@ use App\Models\Filiere;
 use App\Models\Module;
 use App\Models\Element;
 use App\Models\Etudiant;
+use Carbon\Carbon;
+use DB;
 
 
 class AdminHelper {
@@ -199,6 +202,10 @@ class AdminHelper {
                     'id' => $element->id_module,
                     'nom' => Module::find($element->id_module)->nom
                 ],
+                'filiere' => [
+                    'id' => Filiere::find(Module::find($element->id_module)->id_filiere)->id,
+                    'code' => Filiere::find(Module::find($element->id_module)->id_filiere)->code
+                ],
                 'professeur' => [
                     'id' => $element->id_prof,
                     'nom' => $p->nom . ' ' . $p->prenom
@@ -268,6 +275,7 @@ class AdminHelper {
                 'nom' => $u->nom,
                 'prenom' => $u->prenom,
                 'cin' => $u->cin,
+                'email' => $u->email,
                 'filiere' => [
                     'id' => $e->id_filiere,
                     'code' => Filiere::find($e->id_filiere)->code
@@ -277,6 +285,26 @@ class AdminHelper {
         }
 
         return json_decode(json_encode($result), FALSE);
+    }
+    public static function getAllEtudiantByFiliere($id_filiere){
+        $result = array();
+
+        foreach(Etudiant::where('id_filiere', $id_filiere)->get() as $e){
+            $u = User::find($e->id_user);
+            $temp = [
+                'id' => $e->id,
+                'nom' => $u->nom,
+                'prenom' => $u->prenom,
+                'cin' => $u->cin,
+                'email' => $u->email,
+                'filiere' => [
+                    'id' => $id_filiere,
+                    'code' =>Filiere::find($id_filiere)->code
+                ]
+            ];
+            array_push($result, $temp);
+        }
+        return $result;
     }
 
     public static function searchElements($option, $entries){
@@ -324,6 +352,7 @@ class AdminHelper {
                     'required' => 'le champ :attribute est requis',
                     'unique' => 'le :attribute doit être unique',
                     'email.unique' => 'l\':attribute doit être unique',
+                    'email.email' => 'l\':attribute doit être valide',
                     'id_filiere.required' => 'la filiere est requise',
                 ];
             
@@ -338,6 +367,7 @@ class AdminHelper {
                     'required' => 'le champ :attribute est requis',
                     'unique' => 'le :attribute doit être unique',
                     'email.unique' => 'l\':attribute doit être unique',
+                    'email.email' => 'l\':attribute doit être valide',
                 ];
             }
         } elseif($entries['action'] = 'update'){
@@ -408,8 +438,8 @@ class AdminHelper {
         }
     }
 
-    public static function importEtudiants($mode , $collections, $filiere){
-        if($mode == 'one'){
+    public static function importEtudiants($collections, $filiere){
+        // if($mode == 'one'){
             // les etudiants d'une filieres
             /*
 
@@ -423,7 +453,7 @@ class AdminHelper {
 
             */
 
-            $countdetails = AdminHelper::countCollection($mode, $collections);
+            $countdetails = AdminHelper::countCollection($collections);
             // if($countdetails['datacount'] == $countfiliere){
             //     return [
             //         'message' => 'true',
@@ -437,15 +467,15 @@ class AdminHelper {
             //         'datacount' => $countdetails['datacount']
             //     ];
             // }
-
+            $errorinfo = array();
             $count = 0;
                 foreach($collections[0] as $key => $row){
-                    if($count >=2){
+                    if($count >=1){
                         $entry = [
-                            'nom' => $row[1],
-                            'prenom' => $row[2],
-                            'cin' => $row[3],
-                            'email' => $row[4],
+                            'nom' => $row[0],
+                            'prenom' => $row[1],
+                            'cin' => $row[2],
+                            'email' => $row[3],
                             'id_filiere' => $filiere
                         ];
                         $entries = [
@@ -453,39 +483,47 @@ class AdminHelper {
                         ];
                         $add = AdminHelper::addUsersByRole($entry, 5, $entries);
                         if(property_exists((object) json_decode($add), 'error')){
-                            return [
-                                'erreurs' => json_decode($add)->error,
+                            $temp =  [
+                                'errors' => json_decode($add)->error,
                                 'ligne' => $count+1
                             ];
-
+                            array_push($errorinfo, $temp);
                         } 
                     }
                     $count += 1;
 
                 }
+                if(count($errorinfo)){
+                    return [
+                        'count' => count($errorinfo),
+                        'inserterrors' => $errorinfo
+
+                    ];
+                }
                 return [
-                    'success' => 'success'
+                    'success' => 'success',
+                    'registeredcount' => $countdetails['datacount'] == 1 ? 'un etudiant a été ajouter a la filiere '.Filiere::find($filiere)->code : ''.$countdetails['datacount'].' etudiants ont été ajouter a la filiere '.Filiere::find($filiere)->code
                 ];
-            }
+            
      
         
-        else if($mode == 'all'){
-            // les etudiants des tous les filieres
-            return AdminHelper::countCollection($mode, $collections);
-        }
+        // else if($mode == 'all'){
+        //     // les etudiants des tous les filieres
+        //     return AdminHelper::countCollection($mode, $collections);
+        // }
     }
 
-    public static function countCollection($mode, $collections){
+    public static function countCollection($collections){
 
-        if($mode == 'one'){
-            foreach($collections as $key => $value){
-                $count = $value ? count($value) : 0;
-            }
-            return [
-                'lignes' => $count,
-                'datacount' => $count - 2
-            ];
-        }
+        // if($mode == 'one'){
+        //     foreach($collections as $key => $value){
+        //         $count = $value ? count($value) : 0;
+        //     }
+        //     return [
+        //         'lignes' => $count,
+        //         'datacount' => $count - 2
+        //     ];
+        // }
         foreach($collections as $key => $value){
             $count = $value ? count($value) : 0;
         }
@@ -494,6 +532,322 @@ class AdminHelper {
             'datacount' => $count - 1
         ];
         
+
+    }
+
+    public static function getLogs($logs){
+        $result = array();
+        foreach($logs as $log){
+            $user = User::find($log->id_user);
+            $temp = [
+                'id' => $log->id,
+                'nom' => $user->nom,
+                'prenom' => $user->prenom,
+                'date_depart' => Carbon::parse($log->created_at)->format('d-m-Y H:i:s'),
+                'date_fin' => Carbon::parse($log->updated_at)->format('d-m-Y H:i:s')
+            ];
+            array_push($result, $temp);
+        }
+        return $result;
+    }
+    public static function filtrelogs($option, $entries){
+        if($option == "all"){
+            return AdminHelper::getLogs(Log::all());
+        } else if($option == "etudiantfiliere"){
+            if(array_key_exists('date_debut', $entries) && array_key_exists('date_fin', $entries)){
+                return AdminHelper::filtreDate($option, $entries, "two");
+            }
+            else if(array_key_exists('date', $entries)){
+                return AdminHelper::filtreDate($option, $entries);
+            }
+            else if(array_key_exists('id_etudiant', $entries)){
+                $logs =  DB::table('logs')
+                ->join('etudiants', 'etudiants.id_user', '=', 'logs.id_user')
+                ->join('users', 'users.id', '=', 'etudiants.id_user')
+                ->where('etudiants.id', $entries['id_etudiant'])
+                ->select('logs.*')
+                ->get();
+            } else if (array_key_exists('id_filiere', $entries)){
+                $logs =  DB::table('logs')
+                ->join('etudiants', 'etudiants.id_user', '=', 'logs.id_user')
+                ->join('users', 'users.id', '=', 'etudiants.id_user')
+                ->where('etudiants.id_filiere', $entries['id_filiere'])
+                ->select('logs.*')
+                ->get();
+            } else {
+                $logs =  DB::table('logs')
+                ->join('etudiants', 'etudiants.id_user', '=', 'logs.id_user')
+                ->join('users', 'users.id', '=', 'etudiants.id_user')
+                ->select('logs.*')
+                ->get();
+            }   
+            return AdminHelper::getLogs($logs);
+        } else if ($option == "professeur"){
+            if(array_key_exists('date_debut', $entries) && array_key_exists('date_fin', $entries)){
+                return AdminHelper::filtreDate($option, $entries, "two");
+            }
+            else if(array_key_exists('date', $entries)){
+                return AdminHelper::filtreDate($option, $entries);
+            }
+            else if(array_key_exists('id_prof', $entries)){
+                $logs =  DB::table('logs')
+                ->join('professeurs', 'professeurs.id_user', '=', 'logs.id_user')
+                ->join('users', 'users.id', '=', 'professeurs.id_user')
+                ->where('etudiants.id_filiere', $entries['id_prof'])
+                ->select('logs.*')
+                ->get();
+            } else {
+                $logs =  DB::table('logs')
+                ->join('professeurs', 'professeurs.id_user', '=', 'logs.id_user')
+                ->join('users', 'users.id', '=', 'professeurs.id_user')
+                ->select('logs.*')
+                ->get();
+            }
+            return AdminHelper::getLogs($logs);
+        } 
+        else if ($option == "agentscolarite"){
+            if(array_key_exists('date_debut', $entries) && array_key_exists('date_fin', $entries) ){
+                return AdminHelper::filtreDate($option, $entries, "two");
+            }
+            else if(array_key_exists('date', $entries)){
+                return AdminHelper::filtreDate($option, $entries);
+            }
+            else if(array_key_exists('id_agentscolarite', $entries)){
+                $logs =  DB::table('logs')
+                ->join('agent_scolarites', 'agent_scolarites.id_user', '=', 'logs.id_user')
+                ->join('users', 'users.id', '=', 'agent_scolarites.id_user')
+                ->where('agent_scolarites.id', $entries['id_agentscolarite'])
+                ->select('logs.*')
+                ->get();
+            } else {
+                $logs =  DB::table('logs')
+                ->join('agent_scolarites', 'agent_scolarites.id_user', '=', 'logs.id_user')
+                ->join('users', 'users.id', '=', 'agent_scolarites.id_user')
+                ->select('logs.*')
+                ->get();
+            }
+
+            return AdminHelper::getLogs($logs);
+        }
+        else if ($option == "agentexamen"){
+            if(array_key_exists('date_debut', $entries) && array_key_exists('date_fin', $entries) ){
+                return AdminHelper::filtreDate($option, $entries, "two");
+            }
+            else if(array_key_exists('date', $entries)){
+                return AdminHelper::filtreDate($option, $entries);
+            }
+            elseif(array_key_exists('id_agentexamen', $entries)){
+                $logs =  DB::table('logs')
+                ->join('agent_examens', 'agent_examens.id_user', '=', 'logs.id_user')
+                ->join('users', 'users.id', '=', 'agent_examens.id_user')
+                ->where('agent_examens.id', $entries['id_agentexamen'])
+                ->select('logs.*')
+                ->get();
+            } else {
+                $logs =  DB::table('logs')
+                ->join('agent_examens', 'agent_examens.id_user', '=', 'logs.id_user')
+                ->join('users', 'users.id', '=', 'agent_examens.id_user')
+                ->select('logs.*')
+                ->get();
+            }
+
+            return AdminHelper::getLogs($logs);
+        }
+    }
+
+    public static function filtreDate($option, $entries, $dateOption = 'one'){
+
+        if($dateOption == "one"){
+            if($option == "etudiantfiliere"){
+                if(array_key_exists('date', $entries) && array_key_exists('id_filiere', $entries) && array_key_exists('id_etudiant', $entries)){
+                    $logs =  DB::table('logs')
+                    ->join('etudiants', 'etudiants.id_user', '=', 'logs.id_user')
+                    ->join('users', 'users.id', '=', 'etudiants.id_user')
+                    ->where('etudiants.id', $entries['id_etudiant'])
+                    ->whereDate('logs.created_at', Carbon::parse($entries['date'])->format('Y-m-d'))
+                    ->select('logs.*')
+                    ->get();
+
+                    return AdminHelper::getLogs($logs);
+                } else if(array_key_exists('date', $entries) && array_key_exists('id_filiere', $entries)){
+                    $logs =  DB::table('logs')
+                    ->join('etudiants', 'etudiants.id_user', '=', 'logs.id_user')
+                    ->join('users', 'users.id', '=', 'etudiants.id_user')
+                    ->where('etudiants.id_filiere', $entries['id_filiere'])
+                    ->whereDate('logs.created_at', Carbon::parse($entries['date'])->format('Y-m-d'))
+                    ->select('logs.*')
+                    ->get();
+                    return AdminHelper::getLogs($logs);
+                } else {
+                    $logs =  DB::table('logs')
+                    ->join('etudiants', 'etudiants.id_user', '=', 'logs.id_user')
+                    ->join('users', 'users.id', '=', 'etudiants.id_user')
+                    ->whereDate('logs.created_at', Carbon::parse($entries['date'])->format('Y-m-d'))
+                    ->select('logs.*')
+                    ->get();
+                    return AdminHelper::getLogs($logs);
+                }
+            } else if ($option == "professeur"){
+                if(array_key_exists('date', $entries) && array_key_exists('id_prof', $entries)){
+                    $logs =  DB::table('logs')
+                    ->join('professeurs', 'professeurs.id_user', '=', 'logs.id_user')
+                    ->join('users', 'users.id', '=', 'professeurs.id_user')
+                    ->where('professeurs.id', $entries['id_prof'])
+                    ->whereDate('logs.created_at', Carbon::parse($entries['date'])->format('Y-m-d'))
+                    ->select('logs.*')
+                    ->get();
+                    return AdminHelper::getLogs($logs);
+                } else if(array_key_exists('date', $entries)){
+                    $logs =  DB::table('logs')
+                    ->join('professeurs', 'professeurs.id_user', '=', 'logs.id_user')
+                    ->join('users', 'users.id', '=', 'professeurs.id_user')
+                    ->whereDate('logs.created_at', Carbon::parse($entries['date'])->format('Y-m-d'))
+                    ->select('logs.*')
+                    ->get();
+                    return AdminHelper::getLogs($logs);
+                }
+            } else if ($option == "agentscolarite"){
+                if(array_key_exists('date', $entries) && array_key_exists('id_agentscolarite', $entries)){
+                    $logs =  DB::table('logs')
+                    ->join('agent_scolarites', 'agent_scolarites.id_user', '=', 'logs.id_user')
+                    ->join('users', 'users.id', '=', 'agent_scolarites.id_user')
+                    ->where('agent_scolarites.id', $entries['id_agentscolarite'])
+                    ->whereDate('logs.created_at', Carbon::parse($entries['date'])->format('Y-m-d'))
+                    ->select('logs.*')
+                    ->get();
+                    return AdminHelper::getLogs($logs);
+                } else if(array_key_exists('date', $entries)){
+                    $logs =  DB::table('logs')
+                    ->join('agent_scolarites', 'agent_scolarites.id_user', '=', 'logs.id_user')
+                    ->join('users', 'users.id', '=', 'agent_scolarites.id_user')
+                    ->whereDate('logs.created_at', Carbon::parse($entries['date'])->format('Y-m-d'))
+                    ->select('logs.*')
+                    ->get();
+                    return AdminHelper::getLogs($logs);
+                }
+
+            } else if($option == "agentexamen"){
+                if(array_key_exists('date', $entries) && array_key_exists('id_agentexamen', $entries)){
+                    $logs =  DB::table('logs')
+                    ->join('agent_examens', 'agent_examens.id_user', '=', 'logs.id_user')
+                    ->join('users', 'users.id', '=', 'agent_examens.id_user')
+                    ->where('agent_examens.id', $entries['id_agentexamen'])
+                    ->whereDate('logs.created_at', Carbon::parse($entries['date'])->format('Y-m-d'))
+                    ->select('logs.*')
+                    ->get();
+                } else if(array_key_exists('date', $entries)) {
+                    $logs =  DB::table('logs')
+                    ->join('agent_examens', 'agent_examens.id_user', '=', 'logs.id_user')
+                    ->join('users', 'users.id', '=', 'agent_examens.id_user')
+                    ->whereDate('logs.created_at', Carbon::parse($entries['date'])->format('Y-m-d'))
+                    ->select('logs.*')
+                    ->get();
+                }
+                return AdminHelper::getLogs($logs);
+            }
+        } else if ($dateOption == "two"){
+            if($option == "etudiantfiliere"){
+                if(array_key_exists('date_debut', $entries) && array_key_exists('date_fin', $entries) && array_key_exists('id_filiere', $entries) && array_key_exists('id_etudiant', $entries)){
+                    $logs =  DB::table('logs')
+                ->join('etudiants', 'etudiants.id_user', '=', 'logs.id_user')
+                ->join('users', 'users.id', '=', 'etudiants.id_user')
+                ->where('logs.created_at', '>=', Carbon::parse($entries['date_debut'])->format('Y-m-d H:i:s'))
+                ->where('logs.updated_at', '<=', Carbon::parse($entries['date_fin'])->format('Y-m-d H:i:s'))
+                ->where('etudiants.id', $entries['id_etudiant'])
+                ->select('logs.*')
+                ->get();
+
+                return AdminHelper::getLogs($logs);
+
+                } else if(array_key_exists('date_debut', $entries) && array_key_exists('date_fin', $entries) && array_key_exists('id_filiere', $entries)){
+                    $logs =  DB::table('logs')
+                ->join('etudiants', 'etudiants.id_user', '=', 'logs.id_user')
+                ->join('users', 'users.id', '=', 'etudiants.id_user')
+                ->where('etudiants.id_filiere', $entries['id_filiere'])
+                ->where('logs.created_at', '>=', Carbon::parse($entries['date_debut'])->format('Y-m-d H:i:s'))
+                ->where('logs.updated_at', '<=', Carbon::parse($entries['date_fin'])->format('Y-m-d H:i:s'))
+                ->select('logs.*')
+                ->get();
+                return AdminHelper::getLogs($logs);
+                }else {
+                    $logs =  DB::table('logs')
+                    ->join('etudiants', 'etudiants.id_user', '=', 'logs.id_user')
+                    ->join('users', 'users.id', '=', 'etudiants.id_user')
+                    ->where('logs.created_at', '>=', Carbon::parse($entries['date_debut'])->format('Y-m-d H:i:s'))
+                    ->where('logs.updated_at', '<=', Carbon::parse($entries['date_fin'])->format('Y-m-d H:i:s'))
+                    ->select('logs.*')
+                    ->get();
+                    return AdminHelper::getLogs($logs);
+                }
+            } elseif ($option == "professeur"){
+                if(array_key_exists('date_debut', $entries) && array_key_exists('date_fin', $entries) && array_key_exists('id_prof', $entries)){
+                    $logs =  DB::table('logs')
+                    ->join('professeurs', 'professeurs.id_user', '=', 'logs.id_user')
+                    ->join('users', 'users.id', '=', 'professeurs.id_user')
+                    ->where('logs.created_at', '>=', Carbon::parse($entries['date_debut'])->format('Y-m-d H:i:s'))
+                    ->where('logs.updated_at', '<=', Carbon::parse($entries['date_fin'])->format('Y-m-d H:i:s'))
+                    ->where('professeurs.id', $entries['id_prof'])
+                    ->select('logs.*')
+                    ->get();
+                    return AdminHelper::getLogs($logs);
+
+                } else if(array_key_exists('date_debut', $entries) && array_key_exists('date_fin', $entries)) {
+                    $logs =  DB::table('logs')
+                    ->join('professeurs', 'professeurs.id_user', '=', 'logs.id_user')
+                    ->join('users', 'users.id', '=', 'professeurs.id_user')
+                    ->where('logs.created_at', '>=', Carbon::parse($entries['date_debut'])->format('Y-m-d H:i:s'))
+                    ->where('logs.updated_at', '<=', Carbon::parse($entries['date_fin'])->format('Y-m-d H:i:s'))
+                    ->select('logs.*')
+                    ->get();
+                    return AdminHelper::getLogs($logs);
+                }
+            } else if($option == "agentscolarite"){
+                if(array_key_exists('date_debut', $entries) && array_key_exists('date_fin', $entries) && array_key_exists('id_agentscolarite', $entries)){
+                    $logs =  DB::table('logs')
+                    ->join('agent_scolarites', 'agent_scolarites.id_user', '=', 'logs.id_user')
+                    ->join('users', 'users.id', '=', 'agent_scolarites.id_user')
+                    ->where('logs.created_at', '>=', Carbon::parse($entries['date_debut'])->format('Y-m-d H:i:s'))
+                    ->where('logs.updated_at', '<=', Carbon::parse($entries['date_fin'])->format('Y-m-d H:i:s'))
+                    ->where('agent_scolarites.id', $entries['id_agentscolarite'])
+                    ->select('logs.*')
+                    ->get();
+                    return AdminHelper::getLogs($logs);
+
+                } else if(array_key_exists('date_debut', $entries) && array_key_exists('date_fin', $entries)){
+                    $logs =  DB::table('logs')
+                    ->join('agent_scolarites', 'agent_scolarites.id_user', '=', 'logs.id_user')
+                    ->join('users', 'users.id', '=', 'agent_scolarites.id_user')
+                    ->where('logs.created_at', '>=', Carbon::parse($entries['date_debut'])->format('Y-m-d H:i:s'))
+                    ->where('logs.updated_at', '<=', Carbon::parse($entries['date_fin'])->format('Y-m-d H:i:s'))
+                    ->select('logs.*')
+                    ->get();
+                    return AdminHelper::getLogs($logs);
+                }
+            }
+            else if($option == "agentexamen"){
+                if(array_key_exists('date_debut', $entries) && array_key_exists('date_fin', $entries) && array_key_exists('id_agentexamen', $entries)){
+                    $logs =  DB::table('logs')
+                    ->join('agent_examens', 'agent_examens.id_user', '=', 'logs.id_user')
+                    ->join('users', 'users.id', '=', 'agent_examens.id_user')
+                    ->where('logs.created_at', '>=', Carbon::parse($entries['date_debut'])->format('Y-m-d H:i:s'))
+                    ->where('logs.updated_at', '<=', Carbon::parse($entries['date_fin'])->format('Y-m-d H:i:s'))
+                    ->where('agent_examens.id', $entries['id_agentexamen'])
+                    ->select('logs.*')
+                    ->get();
+                    return AdminHelper::getLogs($logs);
+
+                } else if(array_key_exists('date_debut', $entries) && array_key_exists('date_fin', $entries)){
+                    $logs =  DB::table('logs')
+                    ->join('agent_examens', 'agent_examens.id_user', '=', 'logs.id_user')
+                    ->join('users', 'users.id', '=', 'agent_examens.id_user')
+                    ->where('logs.created_at', '>=', Carbon::parse($entries['date_debut'])->format('Y-m-d H:i:s'))
+                    ->where('logs.updated_at', '<=', Carbon::parse($entries['date_fin'])->format('Y-m-d H:i:s'))
+                    ->select('logs.*')
+                    ->get();
+                    return AdminHelper::getLogs($logs);
+                }
+            }
+        }
 
     }
 

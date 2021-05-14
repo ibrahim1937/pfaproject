@@ -17,13 +17,13 @@
             </h6>
         </div>
         
-        <div class="row error-ajout">
+        <div class="row error-ajout moduleajoutcontainer">
                     <div class="form-row">
-                        <div class="col-sm-11 col-lg-5">
-                            <input type="text" class="form-control m-3" placeholder="Code" id="nom">
+                        <div class="col-sm-11 col-lg-5 codemodulecontainer m-3">
+                            <input type="text" class="form-control" placeholder="Code" id="nom">
                         </div>
                         <div class="col-sm-11 col-lg-6">
-                            <div class="custom-file m-3">
+                            <div class="custom-file m-3 filierecontainer">
                                 <select class="form-control" id="filiere">
                                     <option>Choisissez Filiere</option>
                                     @foreach ($filieres as $filiere)
@@ -39,14 +39,30 @@
         
     </div>
     <br><br>
-    <div class="row shadow">
+    <div class="row shadow" style="overflow : hidden;">
         <div class="card-header py-3">
             <h6 class="m-0 font-weight-bold text-primary">Liste Des Modules: </h6>
-            <button disabled="disabled" class="btn btn-danger menu-buttons " id="delete" data-bs-toggle="modal" data-bs-target="#deletemodule">Supprimer</button>
-            <button class="btn btn-light menu-buttons " id="selectall">Selectionner Tout</button>
+            <div class="row">
+              <div class="col col-sm-11 col-lg-3">
+                  <select class="form-select menu-buttons" id="filieresearch">
+                      <option value="">Choisissez une filiere</option>
+                      @foreach ($filieres as $filiere)
+                          <option value="{{ $filiere->id }}">{{ $filiere->code }}</option>
+                      @endforeach
+                  </select> 
+              </div>
+              <div class="col col-sm-11 col-lg-3">
+                  <button class="btn btn-light menu-buttons " style="width:100%;" id="selectall">Selectionner Tout</button>
+              </div>
+              <div class="col col-sm-11 col-lg-3">
+                  <button disabled="disabled" class="btn btn-danger menu-buttons " style="width:100%;" id="delete" data-bs-toggle="modal" data-bs-target="#deletemodule">Supprimer</button>
+              </div> 
+          </div>  
+            {{-- <button disabled="disabled" class="btn btn-danger menu-buttons " id="delete" data-bs-toggle="modal" data-bs-target="#deletemodule">Supprimer</button>
+            <button class="btn btn-light menu-buttons " id="selectall">Selectionner Tout</button> --}}
         </div>
-        <div class="row">
-            <table class="table table-stripped table-hover table-bordered display" style="overflow: auto;">
+        <div class="row table-responsive">
+            <table class="table table-stripped table-hover table-bordered display w-auto mw-100" style="overflow: auto;">
                     <thead>
                       <tr>
                         <th scope="col">Id</th>
@@ -73,12 +89,12 @@
         <form action="" id="form-modifier">
             <div class="modal-body errorparent">
                 <div class="form-row">
-                    <div class="col-sm-11">
+                    <div class="col-sm-11 nommcontainer">
                         <label for="nomm">Code Module</label>
                         <input type="text" class="form-control m-3" placeholder="Code" id="nomm">
                     </div>
-                    <div class="col-sm-11">
-                        <label for="libellem">Libelle</label>
+                    <div class="col-sm-11 filieremcontainer">
+                        <label for="filierem">Filiere</label>
                         <select class="form-control form-select m-3" id="filierem">
                             <option>Choisissez Filiere</option>
                             @foreach ($filieres as $filiere)

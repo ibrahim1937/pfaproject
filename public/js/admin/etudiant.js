@@ -10,25 +10,10 @@ $(".custom-file-input").on("change", function() {
 });
 
 $(document).ready(function() {
-    /*
-    $.ajax({
-        url : gestionurl,
-        type: 'POST',
-        data: {
-            _token: $(document).find('meta[name=csrf-token]').attr('content'),
-            op: 'afficher'
-        },
-        dataType: 'json',
-        success:function(data){
-            console.log(data);
-            fillAll('.display',$('#content-prof'), data);
-        },
-        error: function(error){
-            console.log(error);
-        }
-
+    $("#reset").click(function() {
+        hideErrorsAfterSubmit("importform");
+        hideerrormessage();
     });
-    */
 
     $("#submitetudiant").click(function(e) {
         e.preventDefault();
@@ -65,254 +50,49 @@ $(document).ready(function() {
         });
     });
 
-    $(document).on("click", "#selectall", function(e) {
-        selectAll();
-    });
-
-    $(document).on("change", "th[scope=row]>input", function(e) {
-        if (checkedcount() > 0) {
-            $("#delete").removeAttr("disabled");
-        } else {
-            $("#delete").attr("disabled", "disabled");
-        }
-    });
-
-    $("#deletebutton").click(function(e) {
+    $("#importform").submit(function(e) {
         e.preventDefault();
-
+        var formData = new FormData($(this)[0]);
         $.ajax({
-            url: gestionprofurl,
-            type: "post",
-            data: {
-                _token: $(document)
-                    .find("meta[name=csrf-token]")
-                    .attr("content"),
-                op: "delete",
-                items: checkedids()
-            },
-            dataType: "json",
-            success: function(data) {
-                fillAll(".display", $("#content-prof"), data);
-            },
-            error: function(error) {
-                console.log(error);
-            }
-        });
-
-        $("#deleteprof").modal("hide");
-    });
-
-    $(document).on("click", ".modifier", function(e) {
-        e.preventDefault();
-        element = $(this);
-        $("#nomm").val(
-            element
-                .parent()
-                .closest("tr")
-                .find("td")
-                .eq(0)
-                .text()
-        );
-        $("#prenomm").val(
-            element
-                .parent()
-                .closest("tr")
-                .find("td")
-                .eq(1)
-                .text()
-        );
-        $("#emailm").val(
-            element
-                .parent()
-                .closest("tr")
-                .find("td")
-                .eq(1)
-                .text()
-        );
-        $("#cinm").val(
-            element
-                .parent()
-                .closest("tr")
-                .find("td")
-                .eq(2)
-                .text()
-        );
-        $.ajax({
-            url: gestionprofurl,
+            url: importurl,
             type: "POST",
-            data: {
-                _token: $(document)
-                    .find("meta[name=csrf-token]")
-                    .attr("content"),
-                op: "getemail",
-                id: parseInt(
-                    element
-                        .parent()
-                        .closest("tr")
-                        .find("th")
-                        .eq(0)
-                        .attr("value")
-                )
-            },
+            data: formData,
+            async: false,
+            cache: false,
+            contentType: false,
+            enctype: "multipart/form-data",
+            processData: false,
             dataType: "json",
             success: function(data) {
-                $("#emailm").val(data.email);
-            },
-            error: function(error) {
-                console.log(error);
-            }
-        });
-
-        sessionStorage.setItem(
-            "idprof",
-            parseInt(
-                $(this)
-                    .parent()
-                    .closest("tr")
-                    .find("th")
-                    .eq(0)
-                    .attr("value")
-            )
-        );
-    });
-
-    $("#modifier").click(function(e) {
-        e.preventDefault();
-
-        $.ajax({
-            url: gestionprofurl,
-            type: "post",
-            data: {
-                _token: $(document)
-                    .find("meta[name=csrf-token]")
-                    .attr("content"),
-                op: "update",
-                nom: $("#nomm").val(),
-                prenom: $("#prenomm").val(),
-                email: $("#emailm").val(),
-                cin: $("#cinm").val(),
-                id: sessionStorage.getItem("idprof")
-            },
-            dataType: "json",
-            success: function(data) {
+                hideErrorsAfterSubmit("importform");
+                hideerrormessage();
                 if (data.error) {
-                    hideErrorsAfterSubmit("modifier");
-                    hideerrormessage();
-                    errorHandler(data.error, "modifierform");
-                    messagesHandler($(".errorparent"), "fail");
-                    console.log(data.error);
-                } else {
-                    fillAll(".display", $("#content-prof"), data.data);
-                    hideerrormessage();
-                    $("#exampleModal").modal("hide");
-                    $("#form-modifier")[0].reset();
-                    hideErrorsAfterSubmit("modifier");
-                    sessionStorage.removeItem("idprof");
+                    errorHandler(data.error, "importform");
+                } else if (data.inserterrors) {
+                    importerrorHandler(data.inserterrors);
+                } else if (data.styleerror) {
+                    $("#importform").prepend(
+                        '<span class="text-danger failmessage m-3">' +
+                            data.styleerror +
+                            "</span>"
+                    );
+                } else if (data.success) {
+                    viderimport();
+                    $("#importform").prepend(
+                        '<div class="alert alert-success success m-3" role="alert">' +
+                            data.registeredcount +
+                            "</div>"
+                    );
+                    hideMessage();
                 }
+                console.log(data);
             },
-            error: function(error) {
+            error: function(error, textStatus, jqXHR) {
                 console.log(error);
             }
         });
-    });
-
-    $("#delete").click(function(e) {
-        e.preventDefault();
-        var msg = "Veuillez vous vraiment supprimer ";
-        var message =
-            checkedcount() == 1
-                ? msg + "ce professeur ? "
-                : msg + checkedcount() + " professeurs ?";
-        $(".confirmtext").text(message);
     });
 });
-
-// functions
-
-function checkedcount() {
-    var count = 0;
-    $(document)
-        .find("th[scope=row]>input:checked")
-        .each(function() {
-            count++;
-        });
-    return count;
-}
-function checkedids() {
-    var ids = new Array();
-    $(document)
-        .find("th[scope=row]>input:checked")
-        .each(function() {
-            ids.push(
-                parseInt(
-                    $(this)
-                        .parent()
-                        .attr("value")
-                )
-            );
-        });
-    return ids;
-}
-
-function selectAll() {
-    if (sessionStorage.getItem("allchecked")) {
-        $(document)
-            .find("th[scope=row]>input")
-            .each(function() {
-                $(this)
-                    .eq(0)
-                    .prop("checked", false);
-                $("#delete").attr("disabled", "disabled");
-            });
-        sessionStorage.removeItem("allchecked");
-        return;
-    }
-
-    $(document)
-        .find("th[scope=row]>input")
-        .each(function() {
-            $(this)
-                .eq(0)
-                .prop("checked", true);
-            $("#delete").removeAttr("disabled");
-            checkedids();
-        });
-    sessionStorage.setItem("allchecked", true);
-}
-
-function remplirselect(myData, selector) {
-    lignes = '<option value="">Choisissez un module</option>';
-    for (let i = 0; i < myData.length; i++) {
-        lignes +=
-            '<option value="' +
-            myData[i].id +
-            '">' +
-            myData[i].nom +
-            "</option>";
-    }
-    selector.html(lignes);
-}
-
-function showAll() {
-    $.ajax({
-        url: gestionelementurl,
-        type: "post",
-        data: {
-            _token: $(document)
-                .find("meta[name=csrf-token]")
-                .attr("content"),
-            op: "afficher"
-        },
-        dataType: "json",
-        success: function(data) {
-            remplir($("#content-element"), data);
-            $(".display").DataTable();
-        },
-        error: function(error) {
-            console.log(error);
-        }
-    });
-}
 
 function hideMessage() {
     if ($(".fail")) {
@@ -345,75 +125,10 @@ function messagesHandler(selector, type = "success") {
     hideMessage();
 }
 
-function selectItem(selector, Item) {
-    selector.children().each(function() {
-        if ($(this).attr("value") == Item) {
-            $(this).prop("selected", true);
-        }
-    });
-}
-
-function remplirselectserver(myData, selector, item) {
-    lignes = '<option value="">Choisissez un module</option>';
-    for (let i = 0; i < myData.length; i++) {
-        if (myData[i].id == item) {
-            lignes +=
-                '<option value="' +
-                myData[i].id +
-                '" selected>' +
-                myData[i].nom +
-                "</option>";
-        } else {
-            lignes +=
-                '<option value="' +
-                myData[i].id +
-                '">' +
-                myData[i].nom +
-                "</option>";
-        }
-    }
-    selector.html(lignes);
-}
-
-function remplir(selector, myData) {
-    var ligne = "";
-
-    for (let i = 0; i < myData.length; i++) {
-        ligne +=
-            '<tr><th scope="row" value="' +
-            myData[i].id +
-            '"><input type="checkbox" name="profs" value="">&nbsp' +
-            (i + 1) +
-            "</th>";
-        ligne += "<td> " + myData[i].nom + "</td>";
-        ligne += "<td> " + myData[i].prenom + "</td>";
-        ligne +=
-            "<td> " +
-            (myData[i].cin == null ? "Pas de cin" : myData[i].cin) +
-            "</td>";
-        ligne +=
-            '<td class="text-center"><button type="button" class="btn btn-primary modifier" title="Modifier un element" data-bs-toggle="modal" data-bs-target="#exampleModal">Modifier</button></td></tr>';
-    }
-
-    selector.html(ligne);
-}
-
-function fillAll(table, selector, myData) {
-    if ($.fn.DataTable.isDataTable(table)) {
-        $(table)
-            .DataTable()
-            .destroy();
-    }
-    remplir(selector, myData);
-    $(table).DataTable({
-        order: []
-    });
-}
-
 function viderchamp() {
     $("#nom").val("");
     $("#prenom").val("");
-    $("#prenom").val("");
+    $("#email").val("");
     $("#cin").val("");
     $("#filiereselect").prop("selectedIndex", 0);
 }
@@ -450,7 +165,7 @@ function errorHandler(myData, type = "form") {
                 );
                 $("#prenom").addClass("is-invalid");
             } else if (property == "id_filiere") {
-                $(".filiereselect").addClass("is-invalid");
+                $("#filiereselect").addClass("is-invalid");
                 $(".filierecontainer").append(
                     '<span class="text-danger failmessage">' +
                         myData[property] +
@@ -489,12 +204,30 @@ function errorHandler(myData, type = "form") {
                 );
                 $("#prenomm").addClass("is-invalid");
             } else if (property == "id_filiere") {
-                $(".filiereselect").addClass("is-invalid");
+                $("#filierem").addClass("is-invalid");
                 $(".filierecontainer").append(
                     '<span class="text-danger failmessage">' +
                         myData[property] +
                         "</span>"
                 );
+            }
+        }
+    } else if (type == "importform") {
+        for (const property in myData) {
+            if (property == "filiere") {
+                $(".filierecontainerimport").append(
+                    '<span class="text-danger failmessage">' +
+                        myData[property] +
+                        "</span>"
+                );
+                $("#filiereselectimport").addClass("is-invalid");
+            } else if (property == "file") {
+                $(".filecontainer").append(
+                    '<span class="text-danger failmessage">' +
+                        myData[property] +
+                        "</span>"
+                );
+                $("#customFile").addClass("is-invalid");
             }
         }
     }
@@ -508,6 +241,12 @@ function hideErrorsAfterSubmit(option = "ajouter") {
             }
         });
         return;
+    } else if (option == "importform") {
+        $("#importform :input").each(function() {
+            if ($(this).hasClass("is-invalid")) {
+                $(this).removeClass("is-invalid");
+            }
+        });
     }
     $(".formcontainer :input").each(function() {
         if ($(this).hasClass("is-invalid")) {
@@ -520,4 +259,40 @@ function hideerrormessage() {
     if ($(".failmessage")) {
         $(".failmessage").hide();
     }
+}
+
+function importerrorHandler(myData) {
+    var lignes = "";
+    if (myData.length > 1) {
+        for (let i = 0; i < myData.length; i++) {
+            if (myData.length == 2 && i == 0) {
+                lignes += " " + myData[i].ligne + " ";
+                continue;
+            }
+            if (i == myData.length - 1) {
+                lignes += "et " + myData[i].ligne;
+                continue;
+            }
+            lignes += myData[i].ligne + ", ";
+        }
+        $("#importform").prepend(
+            '<span class="text-danger failmessage m-3">Verrifiez que les informations des étudiants dans les lignes ' +
+                lignes +
+                " sont correctes et uniques" +
+                "</span>"
+        );
+    } else if (myData.length == 1) {
+        lignes += myData[0].ligne;
+        $("#importform").prepend(
+            '<span class="text-danger failmessage m-3">Verrifiez que les informations du l\'étudiant dans la ligne ' +
+                lignes +
+                " sont correctes et uniques" +
+                "</span>"
+        );
+    }
+}
+
+function viderimport() {
+    $("#filiereselectimport").prop("selectedIndex", 0);
+    $(".custom-file-label").html("Choisissez un fichier excel");
 }

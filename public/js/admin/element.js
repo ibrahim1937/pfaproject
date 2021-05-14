@@ -15,47 +15,48 @@ $(document).ready(function() {
 
     $("#submitelement").click(function(e) {
         e.preventDefault();
-
-        if ($("#nom").val() && $("#module").val() && $("#profselect").val()) {
-            $.ajax({
-                url: gestionelementurl,
-                type: "post",
-                data: {
-                    _token: $(document)
-                        .find("meta[name=csrf-token]")
-                        .attr("content"),
-                    op: "ajouter",
-                    nom: $("#nom").val(),
-                    id_module: $("#module")
-                        .find(":selected")
-                        .val(),
-                    id_prof: $("#profselect")
-                        .find(":selected")
-                        .val()
-                },
-                dataType: "json",
-                success: function(data) {
-                    $(".display")
-                        .DataTable()
-                        .destroy();
-                    remplir($("#content-element"), data);
-                    $(".display").DataTable();
-
-                    $("#nom").val("");
-                    $("#filiere").prop("selectedIndex", 0);
-                    $("#module").prop("selectedIndex", 0);
-                    $("#profselect").prop("selectedIndex", 0);
-
-                    messagesHandler($(".error-ajout"));
-                },
-                error: function(error) {
-                    messagesHandler($(".error-ajout"), "faildatabase");
-                    console.log(error);
+        $.ajax({
+            url: gestionelementurl,
+            type: "post",
+            data: {
+                _token: $(document)
+                    .find("meta[name=csrf-token]")
+                    .attr("content"),
+                op: "ajouter",
+                nom: $("#nom").val(),
+                id_module: $("#module")
+                    .find(":selected")
+                    .val(),
+                id_prof: $("#profselect")
+                    .find(":selected")
+                    .val()
+            },
+            dataType: "json",
+            success: function(data) {
+                hideError();
+                if (data.error) {
+                    showError(data.error);
+                } else if (data.success) {
+                    displaySuccessErrorMessages(
+                        $(".error-ajout"),
+                        data.success
+                    );
+                    fillAll(".display", $("#content-element"), data.data);
+                    viderChamps();
+                } else if (data.message.title == "fail") {
+                    displaySuccessErrorMessages(
+                        $(".error-ajout"),
+                        data.message.message,
+                        "fail"
+                    );
                 }
-            });
-        } else {
-            messagesHandler($(".error-ajout"), "fail");
-        }
+                console.log(data);
+            },
+            error: function(error) {
+                messagesHandler($(".error-ajout"), "faildatabase");
+                console.log(error);
+            }
+        });
     });
 
     $(document).on("change", "#filiere", function() {
@@ -85,6 +86,8 @@ $(document).ready(function() {
                     console.log(error);
                 }
             });
+        } else {
+            $("#module").prop("disabled", "disabled");
         }
     });
 
@@ -115,6 +118,9 @@ $(document).ready(function() {
                 }
             });
         } else {
+            $("#modulem").html(
+                '<option value="">Choisissez un module</option>'
+            );
             $("#modulem").prop("disabled", true);
         }
     });
@@ -139,8 +145,6 @@ $(document).ready(function() {
                 success: function(data) {
                     remplirselect(data, $("#modulesearch"));
                     $("#modulesearch").prop("disabled", false);
-                    // remplir($("#content-element"), data);
-                    // $('.display').DataTable();
                 },
                 error: function(error) {
                     console.log(error);
@@ -159,20 +163,13 @@ $(document).ready(function() {
                 },
                 dataType: "json",
                 success: function(data) {
-                    $(".display")
-                        .DataTable()
-                        .destroy();
-                    remplir($("#content-element"), data);
-                    $(".display").DataTable();
+                    fillAll(".display", $("#content-element"), data);
                 },
                 error: function(error) {
                     console.log(error);
                 }
             });
         } else {
-            $(".display")
-                .DataTable()
-                .destroy();
             showAll();
             $("#modulesearch").attr("disabled", "disabled");
         }
@@ -255,11 +252,7 @@ $(document).ready(function() {
             },
             dataType: "json",
             success: function(data) {
-                $(".display")
-                    .DataTable()
-                    .destroy();
-                remplir($("#content-element"), data);
-                $(".display").DataTable();
+                fillAll(".display", $("#content-element"), data);
             },
             error: function(error) {
                 console.log(error);
@@ -301,17 +294,7 @@ $(document).ready(function() {
                         .eq(0)
                         .text()
                 );
-                selectItem(
-                    $("#filierem"),
-                    parseInt(
-                        element
-                            .parent()
-                            .closest("tr")
-                            .find("td")
-                            .eq(1)
-                            .attr("value")
-                    )
-                );
+                selectItem($("#filierem"), parseInt(data.filiere.id));
                 remplirselectserver(
                     data.modules,
                     $("#modulem"),
@@ -335,14 +318,6 @@ $(document).ready(function() {
                             .attr("value")
                     )
                 );
-                console.log(
-                    element
-                        .parent()
-                        .closest("tr")
-                        .find("td")
-                        .eq(2)
-                        .attr("value")
-                );
                 sessionStorage.setItem(
                     "idelement",
                     parseInt(
@@ -363,44 +338,44 @@ $(document).ready(function() {
 
     $("#modifier").click(function(e) {
         e.preventDefault();
-        if (
-            $("#professeurm").val() &&
-            $("#modulem").val() &&
-            $("#filierem").val() &&
-            $("#nomm").val()
-        ) {
-            $.ajax({
-                url: gestionelementurl,
-                type: "post",
-                data: {
-                    _token: $(document)
-                        .find("meta[name=csrf-token]")
-                        .attr("content"),
-                    op: "update",
-                    nom: $("#nomm").val(),
-                    id_module: $("#modulem").val(),
-                    id: sessionStorage.getItem("idelement"),
-                    id_prof: $("#professeurm").val()
-                },
-                dataType: "json",
-                success: function(data) {
-                    $(".display")
-                        .DataTable()
-                        .destroy();
-                    remplir($("#content-element"), data);
-                    $(".display").DataTable();
-                },
-                error: function(error) {
-                    console.log(error);
+        $.ajax({
+            url: gestionelementurl,
+            type: "post",
+            data: {
+                _token: $(document)
+                    .find("meta[name=csrf-token]")
+                    .attr("content"),
+                op: "update",
+                nom: $("#nomm").val(),
+                id_module: $("#modulem").val(),
+                id: sessionStorage.getItem("idelement"),
+                id_prof: $("#professeurm").val()
+            },
+            dataType: "json",
+            success: function(data) {
+                hideError("modifier");
+                if (data.error) {
+                    showErrorModifier(data.error);
+                } else if (data.success) {
+                    fillAll(".display", $("#content-element"), data.data);
+                    $("#exampleModal").modal("hide");
+                } else if (data.message.title == "fail") {
+                    displaySuccessErrorMessages(
+                        $(".errormodifier"),
+                        data.message.message,
+                        "fail"
+                    );
                 }
-            });
+            },
+            error: function(error) {
+                console.log(error);
+            }
+        });
+    });
 
-            sessionStorage.removeItem("idelement");
-            $("#exampleModal").modal("hide");
-            $("#form-modifier")[0].reset();
-        } else {
-            messagesHandler($(".errorparent"), "fail");
-        }
+    $("#exampleModal").on("hidden.bs.modal", function() {
+        hideError("modifier");
+        $("#form-modifier")[0].reset();
     });
 });
 
@@ -409,8 +384,10 @@ function remplir(selector, myData) {
 
     for (let i = 0; i < myData.length; i++) {
         ligne +=
-            '<tr><th scope="row"><input type="checkbox" name="elemets" value=""> &nbsp ' +
+            '<tr><th scope="row" value="' +
             myData[i].id +
+            '"><input type="checkbox" name="elemets" value=""> &nbsp ' +
+            (i + 1) +
             "</th>";
         ligne += "<td> " + myData[i].nom + "</td>";
         ligne +=
@@ -421,10 +398,17 @@ function remplir(selector, myData) {
             "</td>";
         ligne +=
             '<td value="' +
+            myData[i].filiere.id +
+            '"> ' +
+            myData[i].filiere.code +
+            "</td>";
+        ligne +=
+            '<td value="' +
             myData[i].professeur.id +
             '"> ' +
             myData[i].professeur.nom +
             "</td>";
+
         ligne +=
             '<td class="text-center"><button type="button" class="btn btn-primary modifier" title="Modifier un element" data-bs-toggle="modal" data-bs-target="#exampleModal">Modifier</button></td></tr>';
     }
@@ -441,6 +425,18 @@ function checkedcount() {
         });
     return count;
 }
+function fillAll(table, selector, myData) {
+    if ($.fn.DataTable.isDataTable(table)) {
+        $(table)
+            .DataTable()
+            .destroy();
+    }
+    remplir(selector, myData);
+    $(table).DataTable({
+        order: []
+    });
+}
+
 function checkedids() {
     var ids = new Array();
     $(document)
@@ -450,10 +446,11 @@ function checkedids() {
                 parseInt(
                     $(this)
                         .parent()
-                        .text()
+                        .attr("value")
                 )
             );
         });
+    console.log(ids);
     return ids;
 }
 
@@ -507,8 +504,8 @@ function showAll() {
         },
         dataType: "json",
         success: function(data) {
-            remplir($("#content-element"), data);
-            $(".display").DataTable();
+            fillAll(".display", $("#content-element"), data);
+            console.log(data);
         },
         error: function(error) {
             console.log(error);
@@ -575,4 +572,110 @@ function remplirselectserver(myData, selector, item) {
         }
     }
     selector.html(lignes);
+}
+
+function showError(data) {
+    for (property in data) {
+        if (property == "nom") {
+            $(".nomcontainer").append(
+                '<span class="text text-danger m-3 failfield">' +
+                    data[property] +
+                    "</span>"
+            );
+            $(".nomcontainer :input").addClass("is-invalid");
+        } else if (property == "id_prof") {
+            $(".professeurcontainer").append(
+                '<span class="text text-danger m-3 failfield">' +
+                    data[property] +
+                    "</span>"
+            );
+            $("#profselect").addClass("is-invalid");
+        } else if (property == "id_module") {
+            $(".modulecontainer").append(
+                '<span class="text text-danger m-3 failfield">' +
+                    data[property] +
+                    "</span>"
+            );
+            $("#module").addClass("is-invalid");
+        }
+    }
+}
+
+function showErrorModifier(data) {
+    for (property in data) {
+        if (property == "nom") {
+            $(".nommcontainer").append(
+                '<span class="text text-danger m-3 failfield">' +
+                    data[property] +
+                    "</span>"
+            );
+            $(".nommcontainer :input").addClass("is-invalid");
+        } else if (property == "id_prof") {
+            $(".professeurmcontainer").append(
+                '<span class="text text-danger m-3 failfield">' +
+                    data[property] +
+                    "</span>"
+            );
+            $("#professeurm").addClass("is-invalid");
+        } else if (property == "id_module") {
+            $(".modulemcontainer").append(
+                '<span class="text text-danger m-3 failfield">' +
+                    data[property] +
+                    "</span>"
+            );
+            $("#modulem").addClass("is-invalid");
+        }
+    }
+}
+
+function hideError(option = "ajouter") {
+    if (option == "ajouter") {
+        $(".ajoutcontainer :input").each(function() {
+            if ($(this).hasClass("is-invalid")) {
+                $(this).removeClass("is-invalid");
+            }
+        });
+        $(document)
+            .find(".ajoutcontainer")
+            .eq(0)
+            .children()
+            .find(".failfield")
+            .each(function(e) {
+                $(this).hide();
+            });
+    } else if (option == "modifier") {
+        $("#form-modifier :input").each(function() {
+            if ($(this).hasClass("is-invalid")) {
+                $(this).removeClass("is-invalid");
+            }
+        });
+        $(document)
+            .find("#form-modifier")
+            .eq(0)
+            .children()
+            .find(".failfield")
+            .each(function(e) {
+                $(this).hide();
+            });
+    }
+}
+
+function displaySuccessErrorMessages(selector, message, type = "success") {
+    if (type == "success") {
+        selector.prepend(
+            '<div class="alert alert-success m-3 success">' + message + "</div>"
+        );
+    } else if (type == "fail") {
+        selector.prepend(
+            '<div class="alert alert-danger m-3 fail">' + message + "</div>"
+        );
+    }
+    hideMessage();
+}
+
+function viderChamps() {
+    $("#nom").val("");
+    $("#filiere").prop("selectedIndex", 0);
+    $("#module").prop("selectedIndex", 0);
+    $("#profselect").prop("selectedIndex", 0);
 }

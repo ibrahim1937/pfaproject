@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Models\Filiere;
 use App\Models\Module;
+use App\Models\Role;
+use App\Models\Log;
 use App\Models\Etudiant;
 use App\Models\User;
 use App\Models\Element;
@@ -14,6 +16,7 @@ use App\Models\Professeur;
 use App\Models\AgentScolarite;
 use App\Models\AgentExamen;
 use App\Helpers\AdminHelper;
+use App\Helpers\AdminDashboardHelper;
 use Illuminate\Support\Arr;
 use Excel;
 use App\Exports\EtudiantExport;
@@ -27,9 +30,20 @@ class AdminController extends Controller
     public function module(){
         return view('admin.pages.module')->with('filieres', Filiere::all());
     }
+    public function dashboard(){
+        return view('admin.pages.dashboard')->with([
+            'countetudiant' => Etudiant::count(),
+            'countprofesseur' => Professeur::count(),
+            'countagentscolarite' => AgentScolarite::count(),
+            'countagentexamen' => AgentExamen::count()
+        ]);
+    }
 
     public function etudiant(){
         return view('admin.pages.etudiant')->with('filieres', Filiere::all());
+    }
+    public function etudiantliste(){
+        return view('admin.pages.etudiantliste')->with('filieres', Filiere::all());
     }
     public function professeur(){
         return view('admin.pages.professeur')->with([
@@ -42,6 +56,16 @@ class AdminController extends Controller
             'modules' => Module::all(),
             'professeurs' => AdminHelper::getAllProfesseur(),
             'filieres' => Filiere::all()
+        ]);
+    }
+
+    public function log(){
+        return view('admin.pages.logs')->with([
+            'roles' => Role::all(),
+            'filieres' => Filiere::all(),
+            'professeurs' => AdminHelper::getAllProfesseur(),
+            'agentscolarites' => AdminHelper::getAllAgentScolarite(),
+            'agentexamens' => AdminHelper::getAllAgentExamen(),
         ]);
     }
 
@@ -94,11 +118,37 @@ class AdminController extends Controller
                 }
                 return Filiere::all();
             } elseif( $request->op == 'update'){
-                $filiere = Filiere::find($request->id);
-                $filiere->code = $request->code;
-                $filiere->libelle = $request->libelle;
-                $filiere->save();
-                return Filiere::all();
+                $messages = [
+                    'code.required' => 'le code est requis',
+                    'libelle.required' => 'la libelle est requise'
+                ];
+                $validator = Validator::make($request->all(), [
+                    'code' => 'required',
+                    'libelle' => 'required',
+                ], $messages);
+
+                if($validator->fails()){
+                    return json_encode([
+                        'error' => $validator->messages()->get('*')
+                    ]);
+                } else {
+                    // $newFiliere = Filiere::create($request->only('code', 'libelle'));
+                    $filiere = Filiere::find($request->id);
+                    $filiere->code = $request->code;
+                    $filiere->libelle = $request->libelle;
+                    $filiere->save();
+                    if($filiere){
+                        return Filiere::all();
+                    } else {
+                        return [
+                            'message' => [
+                                'title' => 'fail',
+                                'message' => 'Erreur lors de la connexion à la base de données'
+                            ]
+                        ];
+                    }
+                }
+
             }
         }
     }
@@ -146,23 +196,15 @@ class AdminController extends Controller
                         ]);
                     } else {
                         $newModule = Module::create($request->only('nom', 'id_filiere'));
-                        if($newFiliere){
+                        if($newModule){
                             return [
                                 'message' => [
                                     'title' => 'success',
                                     'message' => 'Le module a était crée avec succès'
                                 ],
-                                'data' => Module::all()
+                                'data' => AdminHelper::moduleOutput(Module::all())
                             ];
-                        } else {
-                            return [
-                                'message' => [
-                                    'title' => 'fail',
-                                    'message' => 'Erreur lors de la connexion à la base de données'
-                                ],
-                                'data' => Module::all()
-                            ];
-                        }
+                        } 
                     }
             }
              elseif( $request->op == 'delete'){
@@ -173,8 +215,31 @@ class AdminController extends Controller
                 return AdminHelper::moduleOutput(Module::all());
             }
             elseif( $request->op == 'update'){
-                $module = Module::find($request->id)->update($request->only('nom', 'id_filiere'));
-                return AdminHelper::moduleOutput(Module::all());
+                $messages = [
+                    'nom.required' => 'le nom du module est requis',
+                    'id_filiere.required' => 'la filiere est requise',
+                    'id_filiere.exists' => 'la filiere doit exister',
+
+                ];
+                $validator = Validator::make($request->all(), [
+                    'nom' => 'required',
+                    'id_filiere' => 'required|exists:filieres,id',
+                ], $messages);
+
+                if($validator->fails()){
+                    return json_encode([
+                        'error' => $validator->messages()->get('*')
+                    ]);
+                } else {
+                
+
+                    $module =  Module::find(intval($request->id))->update($request->only('nom', 'id_filiere'));
+                    return AdminHelper::moduleOutput(Module::all());
+                }
+            }
+            elseif( $request->op == "search"){
+                $modules = Module::where('id_filiere', $request->id_filiere)->get();
+                return AdminHelper::moduleOutput($modules);
             }
         } 
 
@@ -187,8 +252,41 @@ class AdminController extends Controller
                 return AdminHelper::displayAllElements(Element::all());
             }
             elseif($request->op == 'ajouter'){
-                $newElement = Element::create($request->only('nom','id_module','id_prof'));
-                return AdminHelper::displayAllElements(Element::all());
+                $messages = [
+                    'nom.required' => 'le nom est requis',
+                    'id_module.required' => 'le champ module  est requis',
+                    'id_prof.required' => 'le champ module  est requis',
+                    'id_prof.exists' => 'L\'identifiant sélectionné n\'est pas valide.',
+                    'id_module.exists' => 'L\'identifiant sélectionné n\'est pas valide.',
+                ];
+                $validator = Validator::make($request->all(), [
+                    'nom' => 'required',
+                    'id_module' => 'required|exists:modules,id',
+                    'id_prof' => 'required|exists:professeurs,id',
+                ], $messages);
+
+                if($validator->fails()){
+                    return json_encode([
+                        'error' => $validator->messages()->get('*')
+                    ]);
+                } else {
+                    $newElement = Element::create($request->only('nom','id_module','id_prof'));
+                    if($newElement){
+                        return [
+                            'success' => 'L\'element est ajouté avec success',
+                            'data' => json_decode(AdminHelper::displayAllElements(Element::all()))
+                        ];
+                    }  else {
+                        return [
+                                    'message' => [
+                                        'title' => 'fail',
+                                        'message' => 'Erreur lors de la connexion à la base de données'
+                                    ]
+                                ];
+                    }
+                }
+                // $newElement = Element::create($request->only('nom','id_module','id_prof'));
+                // return AdminHelper::displayAllElements(Element::all());
             }
             elseif($request->op == 'delete'){
                 foreach($request->items as $item){
@@ -197,6 +295,40 @@ class AdminController extends Controller
                 return AdminHelper::displayAllElements(Element::all());
             }
             elseif($request->op == 'update'){
+                $messages = [
+                    'nom.required' => 'le nom est requis',
+                    'id_module.required' => 'le champ module  est requis',
+                    'id_prof.required' => 'le champ professeur est requis',
+                    'id_prof.exists' => 'L\'identifiant sélectionné n\'est pas valide.',
+                    'id_module.exists' => 'L\'identifiant sélectionné n\'est pas valide.',
+                ];
+                $validator = Validator::make($request->all(), [
+                    'nom' => 'required',
+                    'id_module' => 'required|exists:modules,id',
+                    'id_prof' => 'required|exists:professeurs,id',
+                ], $messages);
+
+                if($validator->fails()){
+                    return json_encode([
+                        'error' => $validator->messages()->get('*')
+                    ]);
+                } else {
+                    $element = Element::find($request->id)
+                    ->update($request->only('nom', 'id_module', 'id_prof'));
+                    if($element){
+                        return [
+                            'success' => 'L\'element est modifié avec success',
+                            'data' => json_decode(AdminHelper::displayAllElements(Element::all()))
+                        ];
+                    }  else {
+                        return [
+                                    'message' => [
+                                        'title' => 'fail',
+                                        'message' => 'Erreur lors de la connexion à la base de données'
+                                    ]
+                                ];
+                    }
+                }
                 $element = Element::find($request->id)
                 ->update($request->only('nom', 'id_module', 'id_prof'));
 
@@ -250,7 +382,9 @@ class AdminController extends Controller
                     'email' => User::find(Professeur::find($request->id)->id_user)->email,
                 ]);
             } elseif($request->op == 'filitrage'){
-
+                return json_decode(AdminHelper::displayAllElements(Element::where('id_prof', $request->id_prof)->get()));
+            } else if ($request->op == "allelements"){
+                return json_decode(AdminHelper::displayAllElements(Element::all()));
             }
             
             
@@ -353,6 +487,45 @@ class AdminController extends Controller
             
         }
     }
+    public function gestionetudiantliste(Request $request){
+        if($request->ajax()){
+            if($request->op == "afficher"){
+                return json_encode(AdminHelper::getAllEtudiant(Etudiant::all()));
+            } else if($request->op == "update"){
+                $rules = [
+                    'nom' => 'required',
+                    'prenom' => 'required',
+                    'email' => 'required|email|unique:users,email,'.User::find(Etudiant::find($request->id)->id_user)->id,
+                    'cin' => 'required|unique:users,cin,'.User::find(Etudiant::find($request->id)->id_user)->id,
+                    'id_filiere' => 'required|exists:filieres,id'
+                ];
+                $messages = [
+                    'email.required' => 'le champ email est requis',
+                    'email.unique' => 'il existe deja un compte associe à l\'email fourni',
+                    'email.email' => 'Veuillez saisir un correcte email',
+                    'cin.required' => 'le champ cin est requis',
+                    'cin.unique' => 'il existe deja un compte associe au cin fourni',
+                    'prenom.required' => 'le champ prenom est requis',
+                    'nom.required' => 'le champ nom est requis',
+                    'id_filiere.required' => 'le champ filiere est requis',
+                    'id_filiere.exists' => 'la filiere doit etre valide',
+                ];
+
+                $validator = Validator($request->all(), $rules, $messages);
+                if($validator->fails()){
+                    return [
+                        'error' => $validator->messages()->get('*')
+                    ];
+                } else {
+                    User::find(Etudiant::find($request->id)->id_user)->update($request->only('nom', 'prenom', 'email', 'cin'));
+                    Etudiant::find($request->id)->update($request->only('id_filiere'));
+                    return json_encode(AdminHelper::getAllEtudiant(Etudiant::all()));
+                }
+            } else if($request->op == "filtragefiliere"){
+                return json_encode(AdminHelper::getAllEtudiantByFiliere($request->id_filiere));
+            }
+        }
+    }
 
     public function export(Request $request){
 
@@ -372,20 +545,25 @@ class AdminController extends Controller
             $messages = [
                 'filiere.required' => 'la filiere est requise',
                 'file.required' => 'le champ de fichier est obligatoire.',
-                'file.mimes' => 'l\'extension du fichier doit être :xlsx'
+                'file.mimes' => 'l\'extension du fichier doit être xlsx'
             ];
             $validator = Validator::make($request->all(), $rules, $messages);
 
             if($validator->fails()){
-                dd($validator->messages()->get('*'));
+                
+                return json_encode(array(
+                    'error' => $validator->errors()->getMessages()));
+
             } else {
                 $users = Excel::toCollection(new EtudiantAllImport(), $request->file('file'));
                 foreach($users[0] as $user){
-                    if($user[0] == '#'){
-                        dd(count($user));
-                        // dd(AdminHelper::importEtudiants('all', $users));
-                    } else if($user[0] == 'Filiere:'){
-                        dd(count($user));
+                    if($user[0] == 'nom'){
+                        // dd(count($user));
+                        return AdminHelper::importEtudiants($users, $request->filiere);
+                    } else {
+                        return json_encode(array(
+                            'styleerror' => 'Veuillez respectez la forme du fichier exemplaire'
+                        ));
                         // $filiere = Filiere::where('code', $user[1])->get('id');
                         // dd(AdminHelper::importEtudiants('one', $users, $filiere->toArray()[0]['id']));
                     }
@@ -415,6 +593,31 @@ class AdminController extends Controller
     public function exportsample(Request $request){
         return Excel::download(new Etudiantsample(), 'exemple.xlsx');
     }
+    public function gestionlogs(Request $request){
+        if($request->ajax()){
+            if($request->op == 'afficher'){
+                return AdminHelper::getLogs(Log::all());
+                
+            } else if($request->op == 'filtre'){
+                return AdminHelper::filtrelogs($request->filtreOp , $request->except('_token', 'op','filtreOp'));
+            } else if ($request->op == "etudiant"){
+                return AdminHelper::getAllEtudiantByFiliere($request->id_filiere);
+            }
+        }
+    }
+    public function gestionDashboard(Request $request){
+        if($request->ajax()){
+            if($request->op == "afficher"){
+                return [
+                    'etudiant' => AdminDashboardHelper::getEtudiantStats(),
+                    'module' => AdminDashboardHelper::getModuleStats()
+                ];
+            }
+        }
+    }
+    
+
+
 }
 
 

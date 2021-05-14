@@ -5,11 +5,13 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
 use Auth;
 use App\Models\User;
+use App\Models\Log;
 use App\Models\Role;
 use App\Models\Admin;
 use App\Models\Professeur;
 use App\Models\AgentExamen;
 use App\Models\AgentScolarite;
+use Carbon\Carbon;
 
 class MainController extends Controller
 {
@@ -81,8 +83,17 @@ class MainController extends Controller
     }
     public function logout(Request $request){
         if(Auth::check()){
+
+
+            $now = Carbon::now();
+            $log = Log::where('id_user' , Auth::user()->id )->latest('last_seen_at')->first();
+            $log->update([
+                'end_session_at' => $now->format('Y-m-d H:i:s')
+            ]);
+
             Auth::logout();
-            return redirect('/login');
+
+            return redirect('/');
         }
     }
     public function routing()

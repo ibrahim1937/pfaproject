@@ -1,3 +1,5 @@
+sessionStorage.clear();
+
 $(document).ready(function() {
     $.ajax({
         url: gestionfiliereurl,
@@ -9,9 +11,10 @@ $(document).ready(function() {
             op: "afficher"
         },
         success: function(data) {
-            console.log(data);
-            remplir($("#content-filiere"), data);
-            $(".display").DataTable();
+            // console.log(data);
+            // remplir($("#content-filiere"), data);
+            // $(".display").DataTable();
+            fillAll(".display", $("#content-filiere"), data);
         },
         error: function(error) {
             console.log(error);
@@ -147,50 +150,84 @@ $(document).ready(function() {
 
     $("#modifier").click(function(e) {
         e.preventDefault();
-        if ($("#codem").val() && $("#libellem").val()) {
-            $.ajax({
-                url: gestionfiliereurl,
-                type: "post",
-                data: {
-                    _token: $(document)
-                        .find("meta[name=csrf-token]")
-                        .attr("content"),
-                    op: "update",
-                    code: $("#codem").val(),
-                    libelle: $("#libellem").val(),
-                    id: sessionStorage.getItem("idfiliere")
-                },
-                success: function(data) {
-                    $(".display")
-                        .DataTable()
-                        .destroy();
-                    remplir($("#content-filiere"), data);
-                    $(".display").DataTable();
-                },
-                error: function(error) {
-                    console.log(error);
+        // if ($("#codem").val() && $("#libellem").val()) {
+        $.ajax({
+            url: gestionfiliereurl,
+            type: "post",
+            data: {
+                _token: $(document)
+                    .find("meta[name=csrf-token]")
+                    .attr("content"),
+                op: "update",
+                code: $("#codem").val(),
+                libelle: $("#libellem").val(),
+                id: sessionStorage.getItem("idfiliere")
+            },
+            dataType: "json",
+            success: function(data) {
+                // $(".display")
+                //     .DataTable()
+                //     .destroy();
+                // remplir($("#content-filiere"), data);
+                // $(".display").DataTable();
+                $(document)
+                    .find(".failfield")
+                    .hide();
+                hideError("modifier");
+                if (data.error) {
+                    showErrorModifier(data.error);
+                } else {
+                    fillAll(".display", $("#content-filiere"), data);
+                    $("#exampleModal").modal("hide");
                 }
-            });
+            },
+            error: function(error) {
+                console.log(error);
+            }
+        });
 
-            sessionStorage.removeItem("idfiliere");
-            $("#exampleModal").modal("hide");
-            $("#form-modifier")[0].reset();
-        } else {
-            $(".errorparent").prepend(
-                '<div class="alert alert-danger m-3 fail">Check your entry</div>'
-            );
-            hideMessage();
-        }
+        // sessionStorage.removeItem("idfiliere");
+        //
+        // $("#form-modifier")[0].reset();
+        // } else {
+        //     $(".errorparent").prepend(
+        //         '<div class="alert alert-danger m-3 fail">Check your entry</div>'
+        //     );
+        //     hideMessage();
+        // }
+    });
+
+    // modal modifier hide
+    $("#exampleModal").on("hidden.bs.modal", function() {
+        $(document)
+            .find(".failfield")
+            .hide();
+        hideError("modifier");
+        $("#form-modifier")[0].reset();
     });
 });
+
+function fillAll(table, selector, myData) {
+    if ($.fn.DataTable.isDataTable(table)) {
+        $(table)
+            .DataTable()
+            .destroy();
+    }
+    remplir(selector, myData);
+    $(table).DataTable({
+        order: []
+    });
+}
 
 function remplir(selector, myData) {
     var ligne = "";
 
     for (let i = 0; i < myData.length; i++) {
         ligne +=
-            '<tr><th scope="row"><input type="checkbox" name="filieres" value=""> &nbsp ' +
+            '<tr><th scope="row" value="' +
             myData[i].id +
+            '"><input type="checkbox" name="filieres" value=""> &nbsp ' +
+            (i + 1) +
             "</th>";
         ligne += "<td> " + myData[i].code + "</td>";
         ligne += "<td> " + myData[i].libelle + "</td>";
@@ -219,7 +256,7 @@ function checkedids() {
                 parseInt(
                     $(this)
                         .parent()
-                        .text()
+                        .attr("value")
                 )
             );
         });
@@ -284,10 +321,38 @@ function showError(data) {
     }
 }
 
-function hideError() {
-    $("#add :input").each(function() {
-        if ($(this).hasClass("is-invalid")) {
-            $(this).removeClass("is-invalid");
+function showErrorModifier(data) {
+    for (property in data) {
+        if (property == "code") {
+            $(".codemcontainer").append(
+                '<span class="text text-danger m-3 failfield">' +
+                    data[property] +
+                    "</span>"
+            );
+            $(".codemcontainer :input").addClass("is-invalid");
+        } else if (property == "libelle") {
+            $(".libellemcontainer").append(
+                '<span class="text text-danger m-3 failfield">' +
+                    data[property] +
+                    "</span>"
+            );
+            $(".libellemcontainer :input").addClass("is-invalid");
         }
-    });
+    }
+}
+
+function hideError(option = "normal") {
+    if (option == "normal") {
+        $("#add :input").each(function() {
+            if ($(this).hasClass("is-invalid")) {
+                $(this).removeClass("is-invalid");
+            }
+        });
+    } else if (option == "modifier") {
+        $("#form-modifier :input").each(function() {
+            if ($(this).hasClass("is-invalid")) {
+                $(this).removeClass("is-invalid");
+            }
+        });
+    }
 }

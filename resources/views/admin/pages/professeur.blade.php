@@ -59,7 +59,7 @@
 
     </div>
     <br><br>
-    <div class="row shadow m-3">
+    <div class="row shadow m-3 " style="overflow: hidden">
         <div class="card-header py-3">
             <h6 class="m-0 font-weight-bold text-primary">Liste Des Professeurs: </h6>
             <div class="row">
@@ -71,9 +71,9 @@
                 </div> 
             </div>             
         </div>
-        <div class="row">
+        <div class="row table-responsive">
         
-                <table class="table table-stripped table-hover table-bordered display" style="overflow: auto;">
+                <table class="table table-stripped table-hover table-bordered display w-auto mw-100" style="overflow: auto;">
                     <thead>
                       <tr>
                         <th scope="col">Id</th>
@@ -92,7 +92,7 @@
     <br><br>
     <div class="row shadow m-3" style="overflow: hidden;">
         <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">Liste Des Element par professeurs: </h6>
+            <h6 class="m-0 font-weight-bold text-primary">Liste Des Elements par professeur: </h6>
             <div class="row">
                 <div class="col col-sm-11 col-lg-4">
                     <label for="profsearch">Chercher par professeur</label>
@@ -118,20 +118,6 @@
                       </tr>
                     </thead>
                     <tbody id="content-prof-search" style="overflow: hidden;">
-                        @php
-                            $test = 0;
-                        @endphp
-                        @foreach ($elements as $e)
-                        @php
-                            $test += 1;
-                        @endphp
-                        <tr>
-                            <th scope="row" value="{{ $e->id }}">{{ $test }}</th>
-                            <td value="{{ $e->id }}">{{ $e->nom }}</td>
-                            <td value="{{ $e->module->id }}" >{{ $e->module->nom }}</td>
-                            <td value="{{ $e->professeur->id }}">{{ $e->professeur->nom}}</td>
-                          </tr>
-                        @endforeach
                      
                     </tbody>
                 </table>

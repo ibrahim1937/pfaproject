@@ -43,14 +43,14 @@
         
     </div>
     <br><br>
-    <div class="row shadow">
+    <div class="row shadow" style="overflow: hidden">
         <div class="card-header py-3">
             <h6 class="m-0 font-weight-bold text-primary">Liste Des Filieres: </h6>
             <button disabled="disabled" class="btn btn-danger menu-buttons " id="delete" data-bs-toggle="modal" data-bs-target="#deletefiliere">Supprimer</button>
             <button class="btn btn-light menu-buttons " id="selectall">Selectionner Tout</button>
         </div>
-        <div class="row">
-                <table class="table table-stripped table-hover table-bordered display" style="position: relative; width:100%;">
+        <div class="row table-responsive">
+                <table class="table table-stripped table-hover table-bordered display w-auto mw-100" style="overflow: auto;">
                     <thead>
                       <tr>
                         <th scope="col">Id</th>
@@ -59,7 +59,7 @@
                         <th scope="col">Modifier</th>
                       </tr>
                     </thead>
-                    <tbody id="content-filiere">
+                    <tbody id="content-filiere" style="overflow: auto">
                      
                     </tbody>
                   </table>
@@ -78,11 +78,11 @@
             @csrf
             <div class="modal-body errorparent">
                 <div class="form-row">
-                    <div class="col-sm-11">
+                    <div class="col-sm-11 codemcontainer">
                         <label for="codem">Code</label>
                         <input type="text" class="form-control m-3" placeholder="Code" id="codem" name="code">
                     </div>
-                    <div class="col-sm-11">
+                    <div class="col-sm-11 libellemcontainer">
                         <label for="libellem">Libelle</label>
                         <input type="text" class="form-control m-3" placeholder="Libelle" id="libellem" name="libelle">
                     </div>

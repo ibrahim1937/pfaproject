@@ -1,26 +1,8 @@
 $(document).ready(function() {
-    $.ajax({
-        url: gestionmoduleurl,
-        type: "post",
-        data: {
-            _token: $(document)
-                .find("meta[name=csrf-token]")
-                .attr("content"),
-            op: "afficher"
-        },
-        dataType: "json",
-        success: function(data) {
-            remplir($("#content-module"), data);
-            $(".display").DataTable();
-        },
-        error: function(error) {
-            console.log(error);
-        }
-    });
+    showAll();
 
     $("#modulesubmit").click(function(e) {
         e.preventDefault();
-        // if ($("#nom").val() && $("#filiere").val()) {
         $.ajax({
             url: gestionmoduleurl,
             type: "post",
@@ -34,18 +16,32 @@ $(document).ready(function() {
             },
             dataType: "json",
             success: function(data) {
-                // $('.display').DataTable().destroy();
-                // remplir($("#content-module"), data.data);
-                // $('.display').DataTable();
-                console.log(data);
+                $(document)
+                    .find(".failfield")
+                    .hide();
+                hideError();
+                if (data.error) {
+                    showError(data.error);
+                } else if (data.message.title == "success") {
+                    $(".moduleajoutcontainer").prepend(
+                        '<div class="alert alert-success m-3 success">' +
+                            data.message.message +
+                            "</div>"
+                    );
+                    hideMessage();
+                    $(".display")
+                        .DataTable()
+                        .destroy();
+                    fillAll(".display", $("#content-module"), data.data);
+                    $("#nom").val("");
+                    $("#filiere").prop("selectedIndex", 0);
+                }
             },
             error: function(error) {
                 console.log(error);
             }
         });
 
-        $("#nom").val("");
-        $("#filiere").prop("selectedIndex", 0);
         // } else {
         //     $(".error-ajout").prepend(
         //         '<div class="alert alert-danger m-3 fail">Veuillez entrer des informations valide</div>'
@@ -90,11 +86,7 @@ $(document).ready(function() {
                 items: checkedids()
             },
             success: function(data) {
-                $(".display")
-                    .DataTable()
-                    .destroy();
-                remplir($("#content-module"), data);
-                $(".display").DataTable();
+                fillAll(".display", $("#content-module"), data);
             },
             error: function(error) {
                 console.log(error);
@@ -130,7 +122,7 @@ $(document).ready(function() {
                     .closest("tr")
                     .find("th")
                     .eq(0)
-                    .text()
+                    .attr("value")
             )
         );
         clearSelect($("#filierem"));
@@ -146,8 +138,42 @@ $(document).ready(function() {
 
     $("#modifier").click(function(e) {
         e.preventDefault();
+        $.ajax({
+            url: gestionmoduleurl,
+            type: "post",
+            data: {
+                _token: $(document)
+                    .find("meta[name=csrf-token]")
+                    .attr("content"),
+                op: "update",
+                id: sessionStorage.getItem("idmodule"),
+                nom: $("#nomm").val(),
+                id_filiere: $("#filierem")
+                    .find(":selected")
+                    .val()
+            },
+            dataType: "json",
+            success: function(data) {
+                $(document)
+                    .find(".failfield")
+                    .hide();
+                hideError("modifier");
+                if (data.error) {
+                    showErrorModifier(data.error);
+                } else {
+                    fillAll(".display", $("#content-module"), data);
+                    $("#exampleModal").modal("hide");
+                }
+                console.log(data);
+            },
+            error: function(error) {
+                console.log(error);
+            }
+        });
+    });
 
-        if ($("#nomm").val() && $("#filierem").val()) {
+    $(document).on("change", "#filieresearch", function(e) {
+        if ($(this).val()) {
             $.ajax({
                 url: gestionmoduleurl,
                 type: "post",
@@ -155,27 +181,27 @@ $(document).ready(function() {
                     _token: $(document)
                         .find("meta[name=csrf-token]")
                         .attr("content"),
-                    op: "update",
-                    id: sessionStorage.getItem("idmodule"),
-                    nom: $("#nomm").val(),
-                    id_filiere: $("#filierem")
-                        .find(":selected")
-                        .val()
+                    op: "search",
+                    id_filiere: $(this).val()
                 },
-                dataType: "json",
                 success: function(data) {
-                    $(".display")
-                        .DataTable()
-                        .destroy();
-                    remplir($("#content-module"), data);
-                    $(".display").DataTable();
+                    fillAll(".display", $("#content-module"), data);
                 },
                 error: function(error) {
                     console.log(error);
                 }
             });
-            $("#exampleModal").modal("hide");
+        } else {
+            showAll();
         }
+    });
+
+    $("#exampleModal").on("hidden.bs.modal", function() {
+        $(document)
+            .find(".failfield")
+            .hide();
+        hideError("modifier");
+        $("#form-modifier")[0].reset();
     });
 });
 
@@ -197,7 +223,7 @@ function checkedids() {
                 parseInt(
                     $(this)
                         .parent()
-                        .text()
+                        .attr("value")
                 )
             );
         });
@@ -228,14 +254,27 @@ function selectAll() {
             $("#delete").removeAttr("disabled");
         });
 }
+function fillAll(table, selector, myData) {
+    if ($.fn.DataTable.isDataTable(table)) {
+        $(table)
+            .DataTable()
+            .destroy();
+    }
+    remplir(selector, myData);
+    $(table).DataTable({
+        order: []
+    });
+}
 
 function remplir(selector, myData) {
     var ligne = "";
 
     for (let i = 0; i < myData.length; i++) {
         ligne +=
-            '<tr><th scope="row"><input type="checkbox" name="modules" value=""> &nbsp ' +
+            '<tr><th scope="row" value="' +
             myData[i].id +
+            '"><input type="checkbox" name="modules" value=""> &nbsp ' +
+            (i + 1) +
             "</th>";
         ligne += "<td> " + myData[i].nom + "</td>";
         ligne +=
@@ -268,6 +307,94 @@ function clearSelect(selector) {
     selector.children().each(function(e) {
         if ($(this).selected) {
             $(this).attr("selected", false);
+        }
+    });
+}
+
+function showError(data) {
+    for (property in data) {
+        if (property == "nom") {
+            $(".codemodulecontainer").append(
+                '<span class="text text-danger m-3 failfield">' +
+                    data[property] +
+                    "</span>"
+            );
+            $(".codemodulecontainer :input").addClass("is-invalid");
+        } else if (property == "id_filiere") {
+            $(".filierecontainer").append(
+                '<span class="text text-danger m-3 failfield">' +
+                    data[property] +
+                    "</span>"
+            );
+            $("#filiere").addClass("is-invalid");
+        }
+    }
+}
+
+function showErrorModifier(data) {
+    for (property in data) {
+        if (property == "nom") {
+            $(".nommcontainer").append(
+                '<span class="text text-danger m-3 failfield">' +
+                    data[property] +
+                    "</span>"
+            );
+            $(".nommcontainer :input").addClass("is-invalid");
+        } else if (property == "id_filiere") {
+            $(".filieremcontainer").append(
+                '<span class="text text-danger m-3 failfield">' +
+                    data[property] +
+                    "</span>"
+            );
+            $("#filierem").addClass("is-invalid");
+        }
+    }
+}
+
+function hideError(option = "addform") {
+    if (option == "addform") {
+        $(".moduleajoutcontainer :input").each(function() {
+            if ($(this).hasClass("is-invalid")) {
+                $(this).removeClass("is-invalid");
+            }
+        });
+    } else if (option == "modifier") {
+        $("#form-modifier :input").each(function() {
+            if ($(this).hasClass("is-invalid")) {
+                $(this).removeClass("is-invalid");
+            }
+        });
+    }
+}
+function hideMessage() {
+    if ($(".fail")) {
+        setTimeout(function() {
+            $(".fail").hide();
+        }, 5000);
+    }
+    if ($(".success")) {
+        setTimeout(function() {
+            $(".success").hide();
+        }, 5000);
+    }
+}
+
+function showAll() {
+    $.ajax({
+        url: gestionmoduleurl,
+        type: "post",
+        data: {
+            _token: $(document)
+                .find("meta[name=csrf-token]")
+                .attr("content"),
+            op: "afficher"
+        },
+        dataType: "json",
+        success: function(data) {
+            fillAll(".display", $("#content-module"), data);
+        },
+        error: function(error) {
+            console.log(error);
         }
     });
 }

@@ -8,13 +8,14 @@ use App\Mail\TestMail;
 
 class MailController extends Controller
 {
-    public function sendmail(){
+    public static function sendmail($title, $body, $url, $emailto){
         $details = [
-            'title' => 'Testing the email',
-            'body' => 'body of the email'
+            'title' => $title,
+            'body' => $body,
+            'url' => $url
         ];
 
-        Mail::to('ibrahimchahboune@gmail.com')->send(new TestMail($details));
-        dd('Email Sent');
+        Mail::to($emailto)->send(new TestMail($details));
+        return true;
     }
 }

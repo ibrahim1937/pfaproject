@@ -11,7 +11,7 @@
     <!-- Page Heading -->
     <h1 class=" mb-2 text-gray-800 text-center">Gestion Elements de module</h1>
 
-    <div class="row shadow">
+    <div class="row shadow ajoutcontainer">
         <div class="py-3 card-header">
             <h6 class="m-0 font-weight-bold text-primary">Ajouter un element de module :
             </h6>
@@ -19,7 +19,7 @@
         
         <div class="row error-ajout">
             <div class="col-sm-11 col-lg-5">
-                <div class="m-3">
+                <div class="m-3 nomcontainer">
                     <label for="nom">Nom</label>
                     <input type="text" class="form-control" placeholder="Code" id="nom">
                 </div>
@@ -28,7 +28,7 @@
                 <div class="custom-file m-3">
                     <label for="filiere">Filiere</label>  
                     <select class="form-select" id="filiere">
-                        <option>Choisissez une filiere</option>
+                        <option value="">Choisissez une filiere</option>
                         @foreach ($filieres as $filiere)
                             <option value="{{ $filiere->id }}">{{ $filiere->code }}</option>
                         @endforeach
@@ -39,10 +39,10 @@
        
         <div class="row">
             <div class="col-sm-11 col-lg-5">
-                <div class="custom-file m-3">
+                <div class="custom-file m-3 modulecontainer">
                     <label for="module">Module</label>    
                     <select class="form-select" id="module" disabled>
-                        <option>Choisissez un module</option>
+                        <option value="">Choisissez un module</option>
                         @foreach ($modules as $module)
                             <option value="{{ $module->id }}">{{ $module->nom }}</option>
                         @endforeach
@@ -51,7 +51,7 @@
                             
             </div>
             <div class="col-sm-11 col-lg-6">
-                <div class="custom-file m-3">
+                <div class="custom-file m-3  professeurcontainer">
                     <label for="profselect">Professeur</label>  
                     <select class="form-select" id="profselect">
                         <option>Choisissez un professeur</option>
@@ -71,7 +71,7 @@
         
     </div>
     <br><br>
-    <div class="row shadow">
+    <div class="row shadow" style="overflow: hidden;">
         <div class="card-header py-3">
             <h6 class="m-0 font-weight-bold text-primary">Liste Des Elements: </h6>
             <div class="row">
@@ -105,13 +105,14 @@
             </div>             
 
         </div>
-        <div class="row">
-                <table class="table table-stripped table-hover table-bordered display" style="overflow: auto;">
+        <div class="row table-responsive">
+                <table class="table table-stripped table-hover table-bordered display w-auto mw-100" style="overflow: auto;">
                     <thead>
                       <tr>
                         <th scope="col">Id</th>
-                        <th scope="col">Nom</th>
+                        <th scope="col">Element</th>
                         <th scope="col">Module</th>
+                        <th scope="col">Filiere</th>
                         <th scope="col">Professeur</th>
                         <th scope="col">Modifier</th>
                       </tr>
@@ -133,8 +134,8 @@
         </div>
         <form action="" id="form-modifier">
             <div class="modal-body errorparent">
-                <div class="form-row">
-                    <div class="col-sm-11 m-3">
+                <div class="form-row errormodifier">
+                    <div class="col-sm-11 m-3 nommcontainer">
                         <label for="nomm">Element</label>
                         <input type="text" class="form-control" placeholder="Code d'element..." id="nomm">
                     </div>
@@ -147,18 +148,18 @@
                             @endforeach
                         </select>
                     </div>
-                    <div class="col-sm-11 m-3">
+                    <div class="col-sm-11 m-3 modulemcontainer">
                         <label for="libellem">Module</label>
                         <select class="form-control form-select" id="modulem">
                             <option value="">Choisissez un module</option>
                         </select>
                     </div>
-                    <div class="col-sm-11 m-3">
+                    <div class="col-sm-11 m-3 professeurmcontainer">
                         <label for="libellem">Professeur</label>
                         <select class="form-control form-select" id="professeurm">
                             <option value="">Choisissez un professeur</option>
                             @foreach ($professeurs as $professeur)
-                                <option value="{{ $professeur->id }}">{{ $professeur->nom }}</option>
+                                <option value="{{ $professeur->id }}">{{ $professeur->nom }} {{ $professeur->prenom }}</option>
                             @endforeach
                         </select>
                     </div>

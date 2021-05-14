@@ -109,41 +109,39 @@
                 <div class="py-3 card-header">
                     <h3 class="m-0 font-weight-bold text-primary">Ajouter des etudiants par filiere</h3>
                 </div>
-                <div class="form-row">
-                    @if(session('error'))
-                        <div class="col col-sm-11">
-                            <div class="alert alert-danger m-3">{{ session('error') }}</div>
-                        </div>
-                        
-                    @endif
+                {{-- <div class="form-row"> --}}
                     
-                    <form action="{{ route('admin.import') }}" method="post" enctype="multipart/form-data">
+                    <form id="importform">
                         @csrf
                         <div class="form-row">
-                            <div class="col col-sm-11 m-3 filierecontainerexport">
+                            <div class="col col-sm-11 m-3 mw-90 filierecontainerimport">
                                 <label for="filiere">Filiere</label>
-                                <select name="filiere" id="filiereselectexport" class="form-select">
+                                <select name="filiere" id="filiereselectimport" class="form-select">
                                     <option value="">Tous les filieres</option>
                                     @foreach ($filieres as $f)
                                         <option value="{{ $f->id }}">{{ $f->code }}</option>
                                     @endforeach
             
                                 </select>
+                                @if(session('errorimport'))
+                                    <p>{{ session('errorimport')['filiere'][0]}}</p>
+                                @endif
 
                             </div>
-                            <div class="col col-sm-11 m-3">
+                            <div class="col col-sm-11 m-3 filecontainer">
                                 <input type="file" @if(session('error'))class="custom-file-input is-invalid py-2"@else class="custom-file-input py-2"@endif  name="file" id="customFile">
                                 <label class="custom-file-label" for="customFile">Choisissez un fichier excel</label>
                             </div>
                         </div>
                     
                     
-                        <div class="col col-sm-11 m-3">
-                            <button type="submit" id="import" class="btn btn-primary">Importer</button>
-                            <a href="{{ route('admin.exportsample') }}" class="btn btn-primary">Telecharger exemplaire d'excel</a>
+                        <div class="col col-sm-11">
+                            <button type="submit" id="import" class="btn btn-primary m-1">Importer</button>
+                            <button type="reset" id="reset" class="btn btn-info m-1">Réinitialiser</button>
+                            <a href="{{ route('admin.exportsample') }}" class="btn btn-primary m-1">Exemplaire Excel</a>
                         </div>
                     </form>
-                </div>
+                {{-- </div> --}}
 
             </div>
             
@@ -154,76 +152,6 @@
     </div>
 
 
-      <!-- Modal de modifiaction-->
-  <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-            <h5 class="modal-title" id="exampleModalLabel">Modifier Etudiant</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <form action="" id="form-modifier">
-            @csrf
-            <div class="modal-body errorparent">
-                <div class="form-row">
-                    <div class="col-sm-11 nomcontainerm m-3">
-                        <label for="nomm">Nom</label>
-                        <input type="text" class="form-control" placeholder="Code" id="nomm">
-                    </div>
-                    <div class="col-sm-11 prenomcontainerm m-3">
-                        <label for="prenomm">Prenom</label>
-                        <input type="text" class="form-control " placeholder="Libelle" id="prenomm">
-                    </div>
-                    <div class="col-sm-11 cincontainerm m-3">
-                        <label for="cinm">CIN</label>
-                        <input type="text" class="form-control " placeholder="Libelle" id="cinm">
-                    </div>
-                    <div class="col-sm-11 emailcontainerm m-3">
-                        <label for="emailm">Email</label>
-                        <input type="email" class="form-control " placeholder="Libelle" id="emailm">
-                    </div>
-                    <div class="col-sm-11 emailcontainerm m-3">
-                        
-                    <label for="filierem">Filiere</label>
-                    <select name="filiere" id="filierem" class="form-select">
-                        <option value="">Choisissez une filiere</option>
-                        @foreach ($filieres as $f)
-                            <option value="{{ $f->id }}">{{ $f->code }}</option>
-                        @endforeach
-                    </select>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            <button type="submit" id="modifier" class="btn btn-success">Modifier</button>
-            </div>
-        </form>
-      </div>
-    </div>
-  </div>
-  
-  <!-- Modal delete-->
-  <div class="modal fade" id="deleteprof" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header" style="background: red; color:white;">
-          <h5 class="modal-title" id="exampleModalLabel">Supprimer un Agent</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body confirmtext">
-          ...
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-          <button type="button" id="deletebutton" class="btn btn-danger">Supprimer</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-
-</div>
 
 
 
@@ -236,6 +164,7 @@
 <script>
     let gestionurl =  "{{ route('admin.gestionetudiant') }}";
     let exporturl = "{{ route('admin.export') }}";
+    let importurl = "{{ route('admin.import') }}";
 </script>
 
 <script src="{{ asset('js/admin/etudiant.js') }}"></script>

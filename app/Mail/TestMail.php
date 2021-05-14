@@ -30,7 +30,7 @@ class TestMail extends Mailable
      */
     public function build()
     {
-        return $this->subject('Bienvenue')
+        return $this->subject('Changer le mot de passe')
                     ->markdown('emails.styled-email');
     }
 }

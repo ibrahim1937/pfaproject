@@ -21,7 +21,6 @@ class Etudiantsample implements FromCollection, ShouldAutoSize, WithHeadings
     public function collection()
     {
         return collect(array([
-            'id' => '',
             'nom' => '',
             'prenom' => '',
             'cin' => '',
@@ -32,7 +31,6 @@ class Etudiantsample implements FromCollection, ShouldAutoSize, WithHeadings
     {
         return [
         
-            '#',
             'nom',
             'prenom',
             'cin',

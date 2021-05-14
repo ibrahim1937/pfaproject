@@ -39,7 +39,7 @@
 
             <div class="sidebar-brand d-flex align-items-center">
                 <div class="sidebar-brand-icon">
-                    <img src="{{ asset('storage/images/'. Auth::user()->photo) }}" alt="userimage" width="50" height="50" style="float: left;">
+                    <img src="{{ file_exists(public_path().'/storage/images/'.Auth::user()->photo) ? asset('storage/images/'. Auth::user()->photo) : asset('storage/images/user.png') }}" alt="userimage" width="50" height="50" style="float: left; border-radius:50%">
                 </div>
                 <div class="sidebar-brand-text mx-3">
                     <span style="font-size: 12px;margin: 5px;">{{ Auth::user()->nom }} {{ Auth::user()->prenom }}</span>
@@ -66,11 +66,28 @@
 
             
 
-            <li class="nav-item">
+            {{-- <li class="nav-item">
                 <a class="nav-link" href="{{ route('admin.etudiant') }}">
                     <i class="fas fa-graduation-cap"></i>
                     <span>Etudiant</span></a>
+            </li> --}}
+
+            <li class="nav-item">
+                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseOne"
+                    aria-expanded="true" aria-controls="collapseTwo">
+                    <i class="fas fa-user-graduate"></i>
+                    <span>Etudiant</span>
+                </a>
+                <div id="collapseOne" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+                    <div class="bg-white py-2 collapse-inner rounded">
+                        <h5 class="collapse-header text-center">Gestion Etudiant:</h5>
+                        <a class="collapse-item" href="{{ route('admin.addetudiant') }}">Ajouter des etudiants</a>
+                        <a class="collapse-item" href="{{ route('admin.listeetudiant') }}">Liste des etudiant</a>
+                    </div>
+                </div>
+                
             </li>
+
 
             <li class="nav-item">
                 <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseThree"
@@ -115,7 +132,7 @@
 
             <!-- Nav Item - Logs -->
             <li class="nav-item">
-                <a class="nav-link" href="charts.html">
+                <a class="nav-link" href="{{ route('admin.logspages') }}">
                     <i class="fas fa-fw fa-chart-area"></i>
                     <span>Logs</span></a>
             </li>
@@ -159,12 +176,12 @@
                                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 <span class="mr-2 d-none d-lg-inline text-gray-600 small">{{ Auth::user()->nom }} {{ Auth::user()->prenom }}</span>
                                 <img class="img-profile rounded-circle"
-                                    src="{{ asset('storage/images/'. Auth::user()->photo) }}">
+                                    src="{{ file_exists(public_path().'/storage/images/'.Auth::user()->photo) ? asset('storage/images/'. Auth::user()->photo) : asset('storage/images/user.png') }}">
                             </a>
                             <!-- Dropdown - User Information -->
                             <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
                                 aria-labelledby="userDropdown">
-                                <a class="dropdown-item" href="#">
+                                <a class="dropdown-item" href="{{ route('admin.profilepage') }}">
                                     <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
                                     Profile
                                 </a>
@@ -235,10 +252,14 @@
         <script src="{{ asset('js/dropzone.js') }}"></script>
         
         <!-- Custom scripts for all pages-->
+        
+
         <script src="{{ asset('js/sb-admin-2.js') }}"></script>
-        <script src="{{ asset('js/all.js') }}"></script>
 
         @yield('scripts')
+        <script src="{{ asset('js/all.js') }}"></script>
+
+        
         
     
     

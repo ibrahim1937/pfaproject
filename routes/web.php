@@ -5,6 +5,9 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\MailController;
 use App\Http\Controllers\MainController;
+use App\Http\Controllers\ForgetPasswordController;
+use App\Http\Controllers\ResetPasswordController;
+use App\Http\Controllers\ProfileController;
 use App\Mail\StyledMail;
 
 /*
@@ -18,7 +21,7 @@ use App\Mail\StyledMail;
 |
 */
 
-Route::view('/','welcome');
+Route::view('/','welcome')->name('home');
 Route::get('/email', function(){
     return new StyledMail();
 });
@@ -30,10 +33,13 @@ Route::get('/send-email', [MailController::class, 'sendmail']);
 Auth::routes();
 Route::view('/login','login')->name('loginpage');
 Route::get('/register',[MainController::class, 'registerindex']);
-Route::post('/logout', function(){
-    Auth::logout();
-    return Redirect::to('/login');
- })->name('logout');
+Route::post('/logout', [MainController::class, 'logout'])->name('logout');
+Route::view('/forget-password', 'forget-password')->name('forgetpasswordpage');
+Route::post('/forget-password', [ForgetPasswordController::class, 'postEmail'])->name('forgetpassword');
+
+//reset password routes 
+Route::get('/reset-password/{token}', [ResetPasswordController::class, 'getPassword']);
+Route::post('/reset-password', [ResetPasswordController::class,'updatePassword'])->name('resetpassword');
 
 Route::post('/login',[LoginController::class, 'login'])->name('login');
 Route::post('/register',[MainController::class, 'register'])->name('register');
@@ -41,13 +47,14 @@ Route::get('/routing',[MainController::class, 'routing'])->name('route');
 
 
 /* This route group is where the authenticated users go to */
-Route::group(['middleware' => 'auth'], function(){
+Route::group(['middleware' => ['auth', 'session.timeout']], function(){
 
     // Route group for admin
     Route::group(['prefix' => 'admin', 'as' => 'admin.'], function(){
         // all views
-        Route::view('/dashboard', 'admin.pages.dashboard')->name('dashboard');
-        Route::get('/gestionEtudiant', [AdminController::class , 'etudiant'])->name('etudiant');
+        Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
+        Route::get('/ajouterdesEtudiant', [AdminController::class , 'etudiant'])->name('addetudiant');
+        Route::get('/listedesEtudiant', [AdminController::class , 'etudiantliste'])->name('listeetudiant');
         Route::view('/gestionfiliere', 'admin.pages.filiere')->name('filiere');
         Route::get('/gestionProfesseur', [AdminController::class, 'professeur'])->name('professeur');
         Route::view('/gestionAgentScolarite', 'admin.pages.agentscolarite')->name('agentscolarite');
@@ -57,6 +64,8 @@ Route::group(['middleware' => 'auth'], function(){
         Route::get('/export', [AdminController::class, 'export'])->name('export');
         Route::get('/exportsample', [AdminController::class, 'exportsample'])->name('exportsample');
         Route::post('/import', [AdminController::class, 'import'])->name('import');
+        Route::get('/logs', [AdminController::class, 'log'])->name('logspages');
+        Route::get('/profile', [ProfileController::class, 'adminProfile'])->name('profilepage');
 
         // post 
         Route::post('/gestionfiliere', [AdminController::class, 'gestionfiliere'])->name('gestionfiliere');
@@ -65,7 +74,11 @@ Route::group(['middleware' => 'auth'], function(){
         Route::post('/gestionProfesseur', [AdminController::class, 'gestionProfesseur'])->name('gestionprofesseur');
         Route::post('/gestionAgentScolarite', [AdminController::class, 'gestionAgentScolarite'])->name('gestionagentscolarite');
         Route::post('/gestionAgentExamen', [AdminController::class, 'gestionAgentExamen'])->name('gestionagentexamen');
-        Route::post('/gestionEtudiant', [AdminController::class , 'gestionetudiant'])->name('gestionetudiant');
+        Route::post('/ajouterdesEtudiant', [AdminController::class , 'gestionetudiant'])->name('gestionetudiant');
+        Route::post('/listedesEtudiant', [AdminController::class , 'gestionetudiantliste'])->name('gestionetudiantliste');
+        Route::post('/logs', [AdminController::class, 'gestionlogs'])->name('logs');
+        Route::post('/profile', [ProfileController::class, 'gestionAdminProfile'])->name('profile');
+        Route::post('/dashboard', [AdminController::class, 'gestionDashboard'])->name('gestiondashboard');
     });
     // Route group for etudiant
     Route::group(['prefix' => 'etudiant', 'as' => 'etudiant.'], function(){
