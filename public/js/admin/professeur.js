@@ -182,13 +182,12 @@ $(document).ready(function() {
             },
             dataType: "json",
             success: function(data) {
+                hideerrormessage("modifier");
                 if (data.error) {
                     hideErrorsAfterSubmit("modifier");
-                    hideerrormessage();
                     errorHandler(data.error, "modifierform");
                 } else {
                     fillAll(".display", $("#content-prof"), data.data);
-                    hideerrormessage();
                     $("#exampleModal").modal("hide");
                     $("#form-modifier")[0].reset();
                     hideErrorsAfterSubmit("modifier");
@@ -541,9 +540,25 @@ function hideErrorsAfterSubmit(option = "ajouter") {
     });
 }
 
-function hideerrormessage() {
-    if ($(".failmessage")) {
-        $(".failmessage").hide();
+function hideerrormessage(option = "ajouter") {
+    if (option == "ajouter") {
+        $(document)
+            .find(".error-ajout")
+            .eq(0)
+            .children()
+            .find(".failmessage")
+            .each(function() {
+                $(this).hide();
+            });
+    } else if (option == "modifier") {
+        $(document)
+            .find(".errorparent")
+            .eq(0)
+            .children()
+            .find(".failmessage")
+            .each(function() {
+                $(this).hide();
+            });
     }
 }
 

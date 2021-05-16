@@ -64,5 +64,11 @@ class Kernel extends HttpKernel
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'session.timeout' => \App\Http\Middleware\SessionTimeout::class,
+        'admin' => \App\Http\Middleware\AdminMiddleware::class,
+        'etudiant' => \App\Http\Middleware\AdminMiddleware::class,
+        'professeur' => \App\Http\Middleware\ProfesseurMiddleware::class,
+        'agentscolarite' => \App\Http\Middleware\AgentScolariteMiddleware::class,
+        'agentexamen' => \App\Http\Middleware\AgentExamenMiddleware::class,
+        'authenticatedmiddleware' => \App\Http\Middleware\AuthenticatedUserMiddleware::class,
     ];
 }

@@ -66,8 +66,9 @@
                 
             </div>
         </div>
-        <div class="form-row m-3">
-            <button type="button" id="submitetudiant" class="btn btn-success">Ajouter</button>
+        <div class="form-row">
+            <button type="button" id="submitetudiant" class="btn btn-success m-3">Ajouter</button>
+            <button type="reset" id="resetetudiant" class="btn btn-info m-3">Réinitialiser</button>
         </div>
 
     </div>

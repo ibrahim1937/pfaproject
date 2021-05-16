@@ -15,6 +15,10 @@ $(document).ready(function() {
         hideerrormessage();
     });
 
+    $("#resetetudiant").click(function() {
+        reset();
+    });
+
     $("#submitetudiant").click(function(e) {
         e.preventDefault();
         $.ajax({
@@ -38,8 +42,7 @@ $(document).ready(function() {
                     hideErrorsAfterSubmit();
                     errorHandler(data.error);
                 } else {
-                    fillAll(".display", $("#content-prof"), data);
-                    messagesHandler($(".errorcontainer"));
+                    messagesHandler($(".error-ajout"));
                     hideErrorsAfterSubmit();
                     viderchamp();
                 }
@@ -85,7 +88,6 @@ $(document).ready(function() {
                     );
                     hideMessage();
                 }
-                console.log(data);
             },
             error: function(error, textStatus, jqXHR) {
                 console.log(error);
@@ -295,4 +297,10 @@ function importerrorHandler(myData) {
 function viderimport() {
     $("#filiereselectimport").prop("selectedIndex", 0);
     $(".custom-file-label").html("Choisissez un fichier excel");
+}
+
+function reset() {
+    viderchamp();
+    hideErrorsAfterSubmit();
+    hideerrormessage();
 }

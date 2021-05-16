@@ -22,15 +22,11 @@ use App\Mail\StyledMail;
 */
 
 Route::view('/','welcome')->name('home');
-Route::get('/email', function(){
-    return new StyledMail();
-});
-
-Route::get('/send-email', [MailController::class, 'sendmail']);
 
 
+// Auth::routes();
+Route::group(['middleware' => 'authenticatedmiddleware'], function(){
 
-Auth::routes();
 Route::view('/login','login')->name('loginpage');
 Route::get('/register',[MainController::class, 'registerindex']);
 Route::post('/logout', [MainController::class, 'logout'])->name('logout');
@@ -43,14 +39,17 @@ Route::post('/reset-password', [ResetPasswordController::class,'updatePassword']
 
 Route::post('/login',[LoginController::class, 'login'])->name('login');
 Route::post('/register',[MainController::class, 'register'])->name('register');
-Route::get('/routing',[MainController::class, 'routing'])->name('route');
+
+});
+
+
 
 
 /* This route group is where the authenticated users go to */
 Route::group(['middleware' => ['auth', 'session.timeout']], function(){
 
     // Route group for admin
-    Route::group(['prefix' => 'admin', 'as' => 'admin.'], function(){
+    Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'admin'], function(){
         // all views
         Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
         Route::get('/ajouterdesEtudiant', [AdminController::class , 'etudiant'])->name('addetudiant');
@@ -81,21 +80,24 @@ Route::group(['middleware' => ['auth', 'session.timeout']], function(){
         Route::post('/dashboard', [AdminController::class, 'gestionDashboard'])->name('gestiondashboard');
     });
     // Route group for etudiant
-    Route::group(['prefix' => 'etudiant', 'as' => 'etudiant.'], function(){
+    Route::group(['prefix' => 'etudiant', 'as' => 'etudiant.', 'middleware' => 'etudiant'], function(){
         Route::view('/dashboard', 'etudiant.master')->name('dashboard');
     });
     // Route group for Professeur
-    Route::group(['prefix' => 'prof', 'as' => 'prof.'], function(){
+    Route::group(['prefix' => 'prof', 'as' => 'prof.', 'middleware' => 'professeur'], function(){
         Route::view('/dashboard', 'prof.master')->name('dashboard');
     });
     // Route group for service de scolarite
-    Route::group(['prefix' => 'service_de_scolarite', 'as' => 'ess.'], function(){
+    Route::group(['prefix' => 'service_de_scolarite', 'as' => 'ess.', 'middleware' => 'agentscolarite'], function(){
         Route::view('/dashboard', 'ess.master')->name('dashboard');
     });
     // Route group for service d'examen
-    Route::group(['prefix' => 'service_examen', 'as' => 'ese.'], function(){
+    Route::group(['prefix' => 'service_examen', 'as' => 'ese.', 'middleware' => 'agentexamen'], function(){
         Route::view('/dashboard', 'ese.master')->name('dashboard');
     });
+
+    // redirecting authenticated user 
+    Route::get('/routing',[MainController::class, 'routing'])->name('route');
     
 });
 

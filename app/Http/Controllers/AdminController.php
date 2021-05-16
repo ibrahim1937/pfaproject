@@ -459,31 +459,12 @@ class AdminController extends Controller
             if($request->op == 'afficher'){
                 return json_encode(AdminHelper::getAllAgentExamen());
             }
-            elseif($request->op == 'ajouter'){
+            if($request->op == 'ajouter'){
                 return AdminHelper::addUsersByRole($request->all(), 5, [
                     'action' => 'add'
                 ]);
             }
-            elseif($request->op == 'delete'){
-                foreach($request->items as $item){
-                    $id = AgentExamen::find($item)->id_user;
-                    User::find($id)->delete();
-                }
-                return json_encode(AdminHelper::getAllAgentExamen());
-            }
-            elseif($request->op == 'update'){
-                return AdminHelper::updateUserByRole($request->all(), 4, [
-                    'action' => 'update',
-                    'id' => User::find(AgentExamen::find($request->id)->id_user)->id
-                ]);
-            } elseif($request->op == 'getemail'){
-                return json_encode([
-                    'email' => User::find(AgentExamen::find($request->id)->id_user)->email,
-                ]);
-            } elseif($request->op == 'export'){
-                return $this->export($request->id_filiere);
-            }
-            
+          
             
         }
     }
@@ -523,6 +504,11 @@ class AdminController extends Controller
                 }
             } else if($request->op == "filtragefiliere"){
                 return json_encode(AdminHelper::getAllEtudiantByFiliere($request->id_filiere));
+            } else if($request->op == "delete"){
+                foreach($request->items as $item){
+                    Etudiant::find($item)->delete();
+                }
+                return json_encode(AdminHelper::getAllEtudiant(Etudiant::all()));
             }
         }
     }

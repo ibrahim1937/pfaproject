@@ -17,7 +17,8 @@ $(document).ready(function() {
             },
             dataType: "json",
             success: function(data) {
-                fillAll(".display", $("#content-prof"), data);
+                fillAll(".display", $("#content-etudiant"), data);
+                console.log(data);
             },
             error: function(error) {
                 console.log(error);
