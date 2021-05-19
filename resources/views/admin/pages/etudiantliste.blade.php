@@ -9,17 +9,17 @@
 <div class="container-fluid">
 
     <!-- Page Heading -->
-    <h1 class=" mb-2 text-gray-800 text-center">Liste des  Etudiants</h1>
+    <h1 class=" mb-2 text-gray-800 text-center">Liste des  Étudiants</h1>
 
     
 
-    <div class="row shadow m-3 " style="overflow: hidden">
+    <div class="row shadow" style="overflow: hidden">
         <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">Liste Des Professeurs: </h6>
+            <h6 class="m-0 font-weight-bold text-primary">Liste des filières: </h6>
             <div class="row">
                 <div class="col col-sm-11 col-lg-3">
                     <select name="filiere" id="filiereselect" class="form-select m-1">
-                        <option value="">Choisissez une filiere</option>
+                        <option value="">Choisissez une filière</option>
                         @foreach ($filieres as $f)
                             <option value="{{ $f->id }}">{{ $f->code }}</option>
                         @endforeach
@@ -54,9 +54,9 @@
                 </table>
             </div>
     </div>
-    <div class="row m-3" style="padding:0px;">
+    <br><br>
+    <div class="row" style="padding:0px;">
 
-        <div class="col col-sm-11">
             <div class="card shadow">
                 <div class="py-3 card-header">
                     <h3 class="m-0 font-weight-bold text-primary">Exporter les etudiants</h3>
@@ -86,7 +86,6 @@
             </div>
             
             
-        </div>
 
         {{-- <div class="col col-sm-12">
             <div class="card shadow">

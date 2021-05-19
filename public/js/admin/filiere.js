@@ -11,9 +11,6 @@ $(document).ready(function() {
             op: "afficher"
         },
         success: function(data) {
-            // console.log(data);
-            // remplir($("#content-filiere"), data);
-            // $(".display").DataTable();
             fillAll(".display", $("#content-filiere"), data);
         },
         error: function(error) {
@@ -50,9 +47,7 @@ $(document).ready(function() {
             dataType: "json",
             success: function(data) {
                 hideError();
-                $(document)
-                    .find(".failfield")
-                    .hide();
+                hideErrorMessage("#add");
                 console.log(data);
                 if (data.error) {
                     showError(data.error);
@@ -143,14 +138,13 @@ $(document).ready(function() {
                     .closest("tr")
                     .find("th")
                     .eq(0)
-                    .text()
+                    .attr("value")
             )
         );
     });
 
     $("#modifier").click(function(e) {
         e.preventDefault();
-        // if ($("#codem").val() && $("#libellem").val()) {
         $.ajax({
             url: gestionfiliereurl,
             type: "post",
@@ -165,14 +159,8 @@ $(document).ready(function() {
             },
             dataType: "json",
             success: function(data) {
-                // $(".display")
-                //     .DataTable()
-                //     .destroy();
-                // remplir($("#content-filiere"), data);
-                // $(".display").DataTable();
-                $(document)
-                    .find(".failfield")
-                    .hide();
+                hideErrorMessage("#form-modifier");
+                console.log(data);
                 hideError("modifier");
                 if (data.error) {
                     showErrorModifier(data.error);
@@ -185,19 +173,8 @@ $(document).ready(function() {
                 console.log(error);
             }
         });
-
-        // sessionStorage.removeItem("idfiliere");
-        //
-        // $("#form-modifier")[0].reset();
-        // } else {
-        //     $(".errorparent").prepend(
-        //         '<div class="alert alert-danger m-3 fail">Check your entry</div>'
-        //     );
-        //     hideMessage();
-        // }
     });
 
-    // modal modifier hide
     $("#exampleModal").on("hidden.bs.modal", function() {
         $(document)
             .find(".failfield")
@@ -355,4 +332,15 @@ function hideError(option = "normal") {
             }
         });
     }
+}
+
+function hideErrorMessage(selector) {
+    $(document)
+        .find(selector)
+        .eq(0)
+        .children()
+        .find(".failfield")
+        .each(function() {
+            $(this).hide();
+        });
 }

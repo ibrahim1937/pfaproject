@@ -25,7 +25,7 @@
                         <div class="col-sm-11 col-lg-6">
                             <div class="custom-file m-3 filierecontainer">
                                 <select class="form-control" id="filiere">
-                                    <option>Choisissez Filiere</option>
+                                    <option>Choisissez Filière</option>
                                     @foreach ($filieres as $filiere)
                                         <option value="{{ $filiere->id }}">{{ $filiere->code }}</option>
                                     @endforeach
@@ -45,7 +45,7 @@
             <div class="row">
               <div class="col col-sm-11 col-lg-3">
                   <select class="form-select menu-buttons" id="filieresearch">
-                      <option value="">Choisissez une filiere</option>
+                      <option value="">Choisissez une filière</option>
                       @foreach ($filieres as $filiere)
                           <option value="{{ $filiere->id }}">{{ $filiere->code }}</option>
                       @endforeach
@@ -58,8 +58,6 @@
                   <button disabled="disabled" class="btn btn-danger menu-buttons " style="width:100%;" id="delete" data-bs-toggle="modal" data-bs-target="#deletemodule">Supprimer</button>
               </div> 
           </div>  
-            {{-- <button disabled="disabled" class="btn btn-danger menu-buttons " id="delete" data-bs-toggle="modal" data-bs-target="#deletemodule">Supprimer</button>
-            <button class="btn btn-light menu-buttons " id="selectall">Selectionner Tout</button> --}}
         </div>
         <div class="row table-responsive">
             <table class="table table-stripped table-hover table-bordered display w-auto mw-100" style="overflow: auto;">
@@ -94,9 +92,9 @@
                         <input type="text" class="form-control m-3" placeholder="Code" id="nomm">
                     </div>
                     <div class="col-sm-11 filieremcontainer">
-                        <label for="filierem">Filiere</label>
+                        <label for="filierem">Filière</label>
                         <select class="form-control form-select m-3" id="filierem">
-                            <option>Choisissez Filiere</option>
+                            <option>Choisissez Filière</option>
                             @foreach ($filieres as $filiere)
                                 <option value="{{ $filiere->id }}">{{ $filiere->code }}</option>
                             @endforeach

@@ -1,7 +1,7 @@
 @extends('admin.master')
 
 @section('title')
-    <title>Gestion des professeurs</title>
+    <title>Registres</title>
 @endsection
 
 @section('content')
@@ -9,7 +9,7 @@
 <div class="container-fluid">
 
     <!-- Page Heading -->
-    <h1 class=" mb-2 text-gray-800 text-center">Logs</h1>
+    <h1 class=" mb-2 text-gray-800 text-center">Registre d'activités</h1>
 
     <div class="row shadow formcontainer">
         <div class="card-header py-3">
@@ -40,9 +40,9 @@
         <div class="row etudiantoption" style="display: none;">
             <div class="col-sm-11 col-lg-5">
                 <div class="m-3 filierecontainer">
-                    <label for="filiereselect">Filiere</label>
+                    <label for="filiereselect">Filière</label>
                     <select name="filiere" id="filiereselect" class="form-select">
-                        <option value="">Choisissez une filiere</option>
+                        <option value="">Choisissez une filière</option>
                         @foreach ($filieres as $f)
                             <option value="{{ $f->id }}">{{ $f->code }}</option>
                         @endforeach
@@ -53,9 +53,9 @@
             <div class="col-sm-11 col-lg-6">
                 <div class="custom-file m-3">
                     <div class="prenomcontainer">
-                        <label for="etudiantselect">Etudiant</label>
+                        <label for="etudiantselect">Étudiant</label>
                         <select name="etudiant" id="etudiantselect" class="form-select">
-                            <option value="">Choisissez un etudiant</option>
+                            <option value="">Choisissez un étudiant</option>
     
                         </select>
                     </div>
@@ -150,7 +150,7 @@
 
     </div>
     <br><br>
-    <div class="row shadow m-3 " style="overflow: hidden">
+    <div class="row shadow" style="overflow: hidden">
         <div class="card-header py-3">
             <h6 class="m-2 font-weight-bold text-primary">Liste Des Registres: </h6>           
         </div>
@@ -164,6 +164,7 @@
                         <th scope="col">Prenom</th>
                         <th scope="col">Debut Session</th>
                         <th scope="col">Fin Session</th>
+                        <th scope="col">Activité</th>
                       </tr>
                     </thead>
                     <tbody id="content-logs" style="overflow: auto;">

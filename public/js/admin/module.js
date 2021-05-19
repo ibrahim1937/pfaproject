@@ -16,9 +16,7 @@ $(document).ready(function() {
             },
             dataType: "json",
             success: function(data) {
-                $(document)
-                    .find(".failfield")
-                    .hide();
+                hideErrorMessage(".moduleajoutcontainer");
                 hideError();
                 if (data.error) {
                     showError(data.error);
@@ -41,13 +39,6 @@ $(document).ready(function() {
                 console.log(error);
             }
         });
-
-        // } else {
-        //     $(".error-ajout").prepend(
-        //         '<div class="alert alert-danger m-3 fail">Veuillez entrer des informations valide</div>'
-        //     );
-        //     hideMessage();
-        // }
     });
 
     $(document).on("change", "th[scope=row]>input", function(e) {
@@ -154,9 +145,7 @@ $(document).ready(function() {
             },
             dataType: "json",
             success: function(data) {
-                $(document)
-                    .find(".failfield")
-                    .hide();
+                hideErrorMessage("#form-modifier");
                 hideError("modifier");
                 if (data.error) {
                     showErrorModifier(data.error);
@@ -397,4 +386,15 @@ function showAll() {
             console.log(error);
         }
     });
+}
+
+function hideErrorMessage(selector) {
+    $(document)
+        .find(selector)
+        .eq(0)
+        .children()
+        .find(".failfield")
+        .each(function() {
+            $(this).hide();
+        });
 }

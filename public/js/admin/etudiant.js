@@ -11,8 +11,7 @@ $(".custom-file-input").on("change", function() {
 
 $(document).ready(function() {
     $("#reset").click(function() {
-        hideErrorsAfterSubmit("importform");
-        hideerrormessage();
+        resetImportForm();
     });
 
     $("#resetetudiant").click(function() {
@@ -37,7 +36,7 @@ $(document).ready(function() {
             },
             dataType: "json",
             success: function(data) {
-                hideerrormessage();
+                hideErrorMessage(".formcontainer");
                 if (data.error) {
                     hideErrorsAfterSubmit();
                     errorHandler(data.error);
@@ -112,7 +111,7 @@ function hideMessage() {
 function messagesHandler(selector, type = "success") {
     if (type == "success") {
         selector.prepend(
-            '<div class="alert alert-success success m-3" role="alert">Les données sont  enregistrées avec succée</div>'
+            '<div class="alert alert-success success m-3" role="alert">L\'étudiant est enregistrée avec succès</div>'
         );
     } else if (type == "faildatabase") {
         selector.prepend(
@@ -302,5 +301,21 @@ function viderimport() {
 function reset() {
     viderchamp();
     hideErrorsAfterSubmit();
-    hideerrormessage();
+    hideErrorMessage(".formcontainer");
+}
+function resetImportForm() {
+    viderimport();
+    hideErrorsAfterSubmit("importform");
+    hideErrorMessage("#importform");
+}
+
+function hideErrorMessage(selector) {
+    $(document)
+        .find(selector)
+        .eq(0)
+        .children()
+        .find(".failmessage")
+        .each(function() {
+            $(this).hide();
+        });
 }

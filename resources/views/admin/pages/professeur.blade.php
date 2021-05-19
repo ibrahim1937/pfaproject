@@ -59,7 +59,7 @@
 
     </div>
     <br><br>
-    <div class="row shadow m-3 " style="overflow: hidden">
+    <div class="row shadow" style="overflow: hidden">
         <div class="card-header py-3">
             <h6 class="m-0 font-weight-bold text-primary">Liste Des Professeurs: </h6>
             <div class="row">
@@ -90,9 +90,9 @@
             </div>
     </div>
     <br><br>
-    <div class="row shadow m-3" style="overflow: hidden;">
+    <div class="row shadow" style="overflow: hidden;">
         <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">Liste Des Elements par professeur: </h6>
+            <h6 class="m-0 font-weight-bold text-primary">Liste Des Éléments par professeur: </h6>
             <div class="row">
                 <div class="col col-sm-11 col-lg-4">
                     <label for="profsearch">Chercher par professeur</label>

@@ -1,7 +1,7 @@
 @extends('admin.master')
 
 @section('title')
-    <title>Gestion des Etudiants</title>
+    <title>Gestion des Étudiants</title>
 @endsection
 
 @section('content')
@@ -9,11 +9,11 @@
 <div class="container-fluid">
 
     <!-- Page Heading -->
-    <h1 class=" mb-2 text-gray-800 text-center">Gestion Etudiants</h1>
+    <h1 class=" mb-2 text-gray-800 text-center">Gestion Étudiants</h1>
 
     <div class="row shadow formcontainer">
         <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">Ajouter un Etudiants :
+            <h6 class="m-0 font-weight-bold text-primary">Ajouter un Étudiant :
             </h6>
         </div>
         
@@ -57,7 +57,7 @@
             <div class="col col-sm-11 m-3 filierecontainer">
                 <label for="filiere">Filiere</label>
                     <select name="filiere" id="filiereselect" class="form-select">
-                        <option value="">Choisissez une filiere</option>
+                        <option value="">Choisissez une filière</option>
                         @foreach ($filieres as $f)
                             <option value="{{ $f->id }}">{{ $f->code }}</option>
                         @endforeach
@@ -73,52 +73,22 @@
 
     </div>
     <br><br>
-    <div class="row m-3" style="padding:0px;">
-{{-- 
-        <div class="col col-sm-11 col-lg-5">
-            <div class="card shadow">
-                <div class="py-3 card-header">
-                    <h3 class="m-0 font-weight-bold text-primary">Exporter les etudiants</h3>
-                </div>
-                <div class="form-row">
-                    <form action="{{ route('admin.export') }}" method="get">
-                        <div class="col col-sm-11 m-3 filierecontainerexport">
-                            <label for="filiere">Filiere</label>
-                                <select name="filiere" id="filiereselectexport" class="form-select">
-                                    <option value="0">Tous les filieres</option>
-                                    @foreach ($filieres as $f)
-                                        <option value="{{ $f->id }}">{{ $f->code }}</option>
-                                    @endforeach
-            
-                                </select>
-                            
-                        </div>
-                    
-                        <div class="col col-sm-11 m-3">
-                            <button type="submit" id="export" class="btn btn-primary">Exporter</a>
-                        </div>
-                    </form>
-                </div>
+    <div class="row" style="padding:0px;">
 
-            </div>
-            
-            
-        </div> --}}
 
         <div class="col col-sm-12">
             <div class="card shadow">
                 <div class="py-3 card-header">
-                    <h3 class="m-0 font-weight-bold text-primary">Ajouter des etudiants par filiere</h3>
+                    <h3 class="m-0 font-weight-bold text-primary">Ajouter des étudiant par filière</h3>
                 </div>
-                {{-- <div class="form-row"> --}}
-                    
+                
                     <form id="importform">
                         @csrf
                         <div class="form-row">
                             <div class="col col-sm-11 m-3 mw-90 filierecontainerimport">
-                                <label for="filiere">Filiere</label>
+                                <label for="filiere">Filière</label>
                                 <select name="filiere" id="filiereselectimport" class="form-select">
-                                    <option value="">Tous les filieres</option>
+                                    <option value="">Tous les filières</option>
                                     @foreach ($filieres as $f)
                                         <option value="{{ $f->id }}">{{ $f->code }}</option>
                                     @endforeach
@@ -142,7 +112,7 @@
                             <a href="{{ route('admin.exportsample') }}" class="btn btn-primary m-1">Exemplaire Excel</a>
                         </div>
                     </form>
-                {{-- </div> --}}
+                
 
             </div>
             

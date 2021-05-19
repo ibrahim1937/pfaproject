@@ -392,7 +392,8 @@ function remplir(selector, myData) {
         ligne += "<td> " + myData[i].nom + "</td>";
         ligne += "<td> " + myData[i].prenom + "</td>";
         ligne += "<td> " + myData[i].date_depart + "</td>";
-        ligne += "<td> " + myData[i].date_fin + "</td></tr>";
+        ligne += "<td> " + myData[i].date_fin + "</td>";
+        ligne += "<td> " + myData[i].activity + "</td></tr>";
     }
 
     selector.html(ligne);

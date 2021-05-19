@@ -52,7 +52,7 @@
             <!-- Nav Item - Dashboard -->
             <li class="nav-item active">
                 <a class="nav-link" href="{{ route('admin.dashboard') }}">
-                    <i class="fas fa-fw fa-tachometer-alt"></i>
+                    <i class="fas fa-home fa-fw "></i>
                     <span>Dashboard</span></a>
             </li>
 
@@ -64,25 +64,18 @@
                 Gestion
             </div>
 
-            
-
-            {{-- <li class="nav-item">
-                <a class="nav-link" href="{{ route('admin.etudiant') }}">
-                    <i class="fas fa-graduation-cap"></i>
-                    <span>Etudiant</span></a>
-            </li> --}}
 
             <li class="nav-item">
                 <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseOne"
                     aria-expanded="true" aria-controls="collapseTwo">
                     <i class="fas fa-user-graduate"></i>
-                    <span>Etudiant</span>
+                    <span>Étudiant</span>
                 </a>
                 <div id="collapseOne" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
                     <div class="bg-white py-2 collapse-inner rounded">
-                        <h5 class="collapse-header text-center">Gestion Etudiant:</h5>
-                        <a class="collapse-item" href="{{ route('admin.addetudiant') }}">Ajouter des etudiants</a>
-                        <a class="collapse-item" href="{{ route('admin.listeetudiant') }}">Liste des etudiant</a>
+                        <h5 class="collapse-header text-center">Gestion Étudiant:</h5>
+                        <a class="collapse-item" href="{{ route('admin.addetudiant') }}">Ajouter des étudiants</a>
+                        <a class="collapse-item" href="{{ route('admin.listeetudiant') }}">Liste des étudiants</a>
                     </div>
                 </div>
                 
@@ -109,7 +102,7 @@
             <li class="nav-item">
                 <a class="nav-link" href="{{ route('admin.filiere') }}">
                     <i class="fas fa-graduation-cap"></i>
-                    <span>Filiere</span></a>
+                    <span>Filière</span></a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" href="{{ route('admin.module') }}">
@@ -119,7 +112,7 @@
             <li class="nav-item">
                 <a class="nav-link" href="{{ route('admin.element') }}">
                     <i class="fas fa-chalkboard-teacher"></i>
-                    <span>Element</span></a>
+                    <span>Élément</span></a>
             </li>
 
             <!-- Divider -->
@@ -134,7 +127,7 @@
             <li class="nav-item">
                 <a class="nav-link" href="{{ route('admin.logspages') }}">
                     <i class="fas fa-fw fa-chart-area"></i>
-                    <span>Logs</span></a>
+                    <span>Registre</span></a>
             </li>
 
 

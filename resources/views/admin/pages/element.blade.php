@@ -1,7 +1,7 @@
 @extends('admin.master')
 
 @section('title')
-    <title>Gestion des professeurs</title>
+    <title>Gestion Eléments</title>
 @endsection
 
 @section('content')
@@ -9,7 +9,7 @@
 <div class="container-fluid">
 
     <!-- Page Heading -->
-    <h1 class=" mb-2 text-gray-800 text-center">Gestion Elements de module</h1>
+    <h1 class=" mb-2 text-gray-800 text-center">Gestion Eléments de module</h1>
 
     <div class="row shadow ajoutcontainer">
         <div class="py-3 card-header">
@@ -28,7 +28,7 @@
                 <div class="custom-file m-3">
                     <label for="filiere">Filiere</label>  
                     <select class="form-select" id="filiere">
-                        <option value="">Choisissez une filiere</option>
+                        <option value="">Choisissez une filière</option>
                         @foreach ($filieres as $filiere)
                             <option value="{{ $filiere->id }}">{{ $filiere->code }}</option>
                         @endforeach
@@ -85,7 +85,7 @@
             <div class="row">
                 <div class="col col-sm-11 col-lg-3">
                     <select class="form-select menu-buttons" id="filieresearch">
-                        <option value="">Choisissez une filiere</option>
+                        <option value="">Choisissez une filière</option>
                         @foreach ($filieres as $filiere)
                             <option value="{{ $filiere->id }}">{{ $filiere->code }}</option>
                         @endforeach

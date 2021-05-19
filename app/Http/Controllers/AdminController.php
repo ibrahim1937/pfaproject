@@ -97,7 +97,7 @@ class AdminController extends Controller
                         return [
                             'message' => [
                                 'title' => 'success',
-                                'message' => 'La filiere a était crée avec succès'
+                                'message' => 'La filière a était crée avec succès'
                             ],
                             'data' => Filiere::all()
                         ];
@@ -132,7 +132,6 @@ class AdminController extends Controller
                         'error' => $validator->messages()->get('*')
                     ]);
                 } else {
-                    // $newFiliere = Filiere::create($request->only('code', 'libelle'));
                     $filiere = Filiere::find($request->id);
                     $filiere->code = $request->code;
                     $filiere->libelle = $request->libelle;
@@ -162,33 +161,14 @@ class AdminController extends Controller
 
                     $messages = [
                         'nom.required' => 'le nom du module est requis',
-                        'id_filiere.required' => 'la filiere est requise',
-                        'id_filiere.exists' => 'la filiere doit exister',
+                        'id_filiere.required' => 'la filière est requise',
+                        'id_filiere.exists' => 'la filière doit être valide',
 
                     ];
                     $validator = Validator::make($request->all(), [
                         'nom' => 'required',
                         'id_filiere' => 'required|exists:filieres,id',
                     ], $messages);
-
-                    // $newModule = Module::create($request->only('nom', 'id_filiere'));
-                    // if($newModule){
-                    //     return [
-                    //         'message' => [
-                    //             'title' => 'success',
-                    //             'message' => 'La filiere a était crée avec succès'
-                    //         ],
-                    //         'data' => AdminHelper::moduleOutput(Module::all())
-                    //     ];
-                    // } else {
-                    //     return [
-                    //         'message' => [
-                    //             'title' => 'fail',
-                    //             'message' => 'Erreur lors de la connexion à la base de données'
-                    //         ],
-                    //         'data' => AdminHelper::moduleOutput(Module::all())
-                    //     ];
-                    // }
 
                     if($validator->fails()){
                         return json_encode([
@@ -273,7 +253,7 @@ class AdminController extends Controller
                     $newElement = Element::create($request->only('nom','id_module','id_prof'));
                     if($newElement){
                         return [
-                            'success' => 'L\'element est ajouté avec success',
+                            'success' => 'L\'élément est ajouté avec succès',
                             'data' => json_decode(AdminHelper::displayAllElements(Element::all()))
                         ];
                     }  else {
@@ -285,8 +265,6 @@ class AdminController extends Controller
                                 ];
                     }
                 }
-                // $newElement = Element::create($request->only('nom','id_module','id_prof'));
-                // return AdminHelper::displayAllElements(Element::all());
             }
             elseif($request->op == 'delete'){
                 foreach($request->items as $item){
@@ -607,25 +585,5 @@ class AdminController extends Controller
 }
 
 
-/* 
-
-filiere::all() => select * from 
 
 
-$user = User::find(Etudiant::find(id_etudiant)->id_user);
-$user->nom;
-$user->email
-
-
-
-return  [
-    'nom' => $user->nom,
-    'prenom' => $user->prenom
- ]
- json_encode
-
-
-
-
-
-*/

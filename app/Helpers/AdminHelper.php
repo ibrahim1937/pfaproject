@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
 use App\Models\Log;
+use App\Models\Activities;
 use App\Models\Professeur;
 use App\Models\AgentScolarite;
 use App\Models\AgentExamen;
@@ -49,14 +50,6 @@ class AdminHelper {
 
     public static function addUsersByRole($entry, $role, $entries){
 
-        
-
-        // the password will be nom + prenom linked by .
-        //$password = trim(strtolower($entry->nom) . '.' . strtolower($entry->prenom));
-
-        //$newUser->password = Hash::make($password);
-
-        // Un professeur
         
 
             $validatordata = AdminHelper::getValidatorParameters($entries, $role);
@@ -353,7 +346,7 @@ class AdminHelper {
                     'unique' => 'le :attribute doit être unique',
                     'email.unique' => 'l\':attribute doit être unique',
                     'email.email' => 'l\':attribute doit être valide',
-                    'id_filiere.required' => 'la filiere est requise',
+                    'id_filiere.required' => 'la filière est requise',
                 ];
             
             }  else {
@@ -383,7 +376,7 @@ class AdminHelper {
                     'required' => 'le champ :attribute est requis',
                     'unique' => 'le :attribute doit être unique',
                     'email.unique' => 'l\':attribute doit être unique',
-                    'filiere.required' => 'la filiere est requise'
+                    'filiere.required' => 'la filière est requise'
                 ];
             }else {
                 $rules = [
@@ -539,12 +532,14 @@ class AdminHelper {
         $result = array();
         foreach($logs as $log){
             $user = User::find($log->id_user);
+
             $temp = [
                 'id' => $log->id,
                 'nom' => $user->nom,
                 'prenom' => $user->prenom,
                 'date_depart' => Carbon::parse($log->created_at)->format('d-m-Y H:i:s'),
-                'date_fin' => Carbon::parse($log->updated_at)->format('d-m-Y H:i:s')
+                'date_fin' => Carbon::parse($log->updated_at)->format('d-m-Y H:i:s'),
+                'activity' => count(Activities::where('id_log', $log->id)->get()) ? Activities::where('id_log', $log->id)->get() : 'aucune activité'
             ];
             array_push($result, $temp);
         }

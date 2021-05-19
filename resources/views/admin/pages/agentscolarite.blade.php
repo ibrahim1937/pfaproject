@@ -59,7 +59,7 @@
 
     </div>
     <br><br>
-    <div class="row shadow m-3">
+    <div class="row shadow" style="overflow: hidden;">
         <div class="card-header py-3">
             <h6 class="m-0 font-weight-bold text-primary">Liste Des Agents de scolarité: </h6>
             <div class="row">
@@ -71,7 +71,7 @@
                 </div> 
             </div>             
         </div>
-        <div class="row">
+        <div class="row table-responsive">
         
                 <table class="table table-stripped table-hover table-bordered display" style="overflow: auto;">
                     <thead>

@@ -679,3 +679,14 @@ function viderChamps() {
     $("#module").prop("selectedIndex", 0);
     $("#profselect").prop("selectedIndex", 0);
 }
+
+function hideErrorMessage(selector) {
+    $(document)
+        .find(selector)
+        .eq(0)
+        .children()
+        .find(".failfield")
+        .each(function() {
+            $(this).hide();
+        });
+}
