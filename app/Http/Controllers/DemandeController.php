@@ -9,11 +9,14 @@ use App\Models\Element;
 use App\Models\Etat;
 use App\Models\Etudiant;
 use App\Models\Module;
+use App\Models\Activities;
+use App\Models\Log;
 use App\Models\Professeur;
 use App\Models\Rectifier;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Collection;
 
 class DemandeController extends Controller
 {
@@ -124,6 +127,12 @@ class DemandeController extends Controller
 
                     if($demande){
 
+                        $log = Log::where('id_user' , $user )->latest('last_seen_at')->first();
+                        Activities::create([
+                            'id_log' => $log->id,
+                            'activity' => 'Ajouter une demande'
+                        ]);
+
                         return json_encode([
                             'message' => [
                                 'title' => 'success',
@@ -181,6 +190,12 @@ class DemandeController extends Controller
                     ]);
                 if($demande){
 
+                    $log = Log::where('id_user' , Auth::user()->id )->latest('last_seen_at')->first();
+                        Activities::create([
+                            'id_log' => $log->id,
+                            'activity' => 'Accepter une demande'
+                        ]);
+
                     return json_encode([
                         'message' => [
                             'title' => 'success',
@@ -203,6 +218,12 @@ class DemandeController extends Controller
                     'id_etat'=>4
                     ]);
                 if($demande){
+
+                    $log = Log::where('id_user' , Auth::user()->id )->latest('last_seen_at')->first();
+                        Activities::create([
+                            'id_log' => $log->id,
+                            'activity' => 'Refuser une demande'
+                        ]);
 
                     return json_encode([
                         'message' => [
@@ -451,6 +472,12 @@ class DemandeController extends Controller
                 // return json_encode();
                 if($m){
 
+                    $log = Log::where('id_user' , Auth::user()->id )->latest('last_seen_at')->first();
+                        Activities::create([
+                            'id_log' => $log->id,
+                            'activity' => 'Livrer une demande'
+                        ]);
+
                     return json_encode([
                         'message' => [
                             'title' => 'success',
@@ -540,7 +567,11 @@ class DemandeController extends Controller
                 $m->save();
                 // return json_encode($this->accepterParEseshow());
                 if($m){
-
+                    $log = Log::where('id_user' , Auth::user()->id )->latest('last_seen_at')->first();
+                        Activities::create([
+                            'id_log' => $log->id,
+                            'activity' => 'Livrer une demande'
+                        ]);
                     return json_encode([
                         'message' => [
                             'title' => 'success',
@@ -593,6 +624,12 @@ class DemandeController extends Controller
                 $m->save();
                 if($m){
 
+                    $log = Log::where('id_user' , Auth::user()->id  )->latest('last_seen_at')->first();
+                        Activities::create([
+                            'id_log' => $log->id,
+                            'activity' => 'Accepter une demande'
+                        ]);
+
                     return json_encode([
                         'message' => [
                             'title' => 'success',
@@ -615,6 +652,14 @@ class DemandeController extends Controller
                 $m->id_etat = 4;
                 $m->save();
                 if($m){
+
+                    
+
+                    $log = Log::where('id_user' , Auth::user()->id )->latest('last_seen_at')->first();
+                        Activities::create([
+                            'id_log' => $log->id,
+                            'activity' => 'Refuser une demande'
+                        ]);
 
                     return json_encode([
                         'message' => [
@@ -761,6 +806,12 @@ class DemandeController extends Controller
 
                     if($rectifier){
 
+                        $log = Log::where('id_user' , Auth::user()->id )->latest('last_seen_at')->first();
+                        Activities::create([
+                            'id_log' => $log->id,
+                            'activity' => 'Ajouter une demande'
+                        ]);
+
                         return json_encode([
                             'message' => [
                                 'title' => 'success',
@@ -826,6 +877,11 @@ class DemandeController extends Controller
                 $r=Rectifier::find($request->id)->update(['id_etat'=>2]);
                 if($r){
                     // return json_encode($this->getAllRectifier());
+                    $log = Log::where('id_user' , Auth::user()->id )->latest('last_seen_at')->first();
+                        Activities::create([
+                            'id_log' => $log->id,
+                            'activity' => ' Accepter une demande'
+                        ]);
                     return [
                         'message' => [
                             'title' => 'success',
@@ -847,6 +903,11 @@ class DemandeController extends Controller
                 $r=Rectifier::find($request->id)->update(['id_etat'=>4]);
                 if($r){
                     // return json_encode($this->getAllRectifier());
+                    $log = Log::where('id_user' , Auth::user()->id )->latest('last_seen_at')->first();
+                        Activities::create([
+                            'id_log' => $log->id,
+                            'activity' => 'Refuser une demande'
+                        ]);
                     return [
                         'message' => [
                             'title' => 'success',
@@ -1448,26 +1509,34 @@ class DemandeController extends Controller
     public function profdashboardsuive(){
 
         $result = array();
+        $rectiflistesarrat = array();
         $user=Auth::user()->id;
         $prof = Professeur::where('id_user', $user)->get();
-        $rectiflistes = Rectifier::where('id_etudiant', $prof[0]->id)->orderBy('created_at', 'DESC')->take(5)->get();
-        foreach ($rectiflistes as $d) {
-            $element = Element::find($d->id_element)->nom;
-            $etat = Etat::find($d->id_etat)->etat;
-            $etudiant = Etudiant::find($d->id_etudiant);
-            $categorie1 = CategorieDemande::find($d->id_categorie);
+        // $rectiflistes = Rectifier::where('id_element', $prof[0]->id)->orderBy('created_at', 'DESC')->take(5)->get();
+        foreach(Element::all() as $element){
+            if($element->id_prof != $prof[0]->id){
+                continue;
+            }
+            array_push($rectiflistesarrat, Rectifier::where('id_element', $element->id)->orderBy('created_at', 'DESC')->take(5)->get());
+        }
+        
+        foreach ( collect($rectiflistesarrat) as $d) {
+            $element = Element::find($d[0]->id_element)->nom;
+            $etat = Etat::find($d[0]->id_etat)->etat;
+            $etudiant = Etudiant::find($d[0]->id_etudiant);
+            $categorie1 = CategorieDemande::find($d[0]->id_categorie);
             $user = User::find($etudiant->id_user);
             $temp = [
                 'elem'=>$element,
                 'nom' => $user->nom,
                 'prenom' => $user->prenom,
-                'created_at'=>$d->created_at->format('Y-m-d'),
+                'created_at'=>$d[0]->created_at->format('Y-m-d'),
                 'etat'=>$etat
 
             ];
             array_push($result, $temp);
         }
-        return($result);
+        return $result;
 
 
 
