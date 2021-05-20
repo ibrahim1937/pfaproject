@@ -67,7 +67,30 @@ class ProfileController extends Controller
         ]);
     }
 
-  
+
+    
+    public function etudiantProfile(){
+        return view('etudiant.pages.profile')->with([
+            'role' => Role::find(Auth::user()->role_id)
+        ]);
+    }
+    public function profProfile(){
+        return view('prof.pages.profile')->with([
+            'role' => Role::find(Auth::user()->role_id)
+        ]);
+    }
+    public function essProfile(){
+        return view('ess.pages.profile')->with([
+            'role' => Role::find(Auth::user()->role_id)
+        ]);
+    }
+    public function eseProfile(){
+        return view('ese.pages.profile')->with([
+            'role' => Role::find(Auth::user()->role_id)
+        ]);
+    }
+
+
 
     public function gestionAdminProfile(Request $request){
         if($request->ajax()){
@@ -95,15 +118,15 @@ class ProfileController extends Controller
                     }
                 }
             } else if ($request->op == "modifier"){
-                
+
                 if($request->nom){
                     $validator = Validator::make($request->all(), $this->nomrule, $this->nommessages);
                     $champ = "nom";
-                } 
+                }
                 else if($request->prenom){
                     $validator = Validator::make($request->all(), $this->prenomrule, $this->prenomessages);
                     $champ = "prenom";
-                } 
+                }
                 else if(property_exists((object) $request->all(), 'nom')){
                     $validator = Validator::make($request->all(), $this->nomrule, $this->nommessages);
                     $champ = "nom";
@@ -154,6 +177,355 @@ class ProfileController extends Controller
                             ->with('imagesuccess','You have successfully upload image.');
                 }
         }
-        
+
     }
+    public function gestionEtudiantProfile(Request $request){
+        if($request->ajax()){
+            if($request->op == "password"){
+                $validator = Validator::make($request->all() , $this->passwordrules, $this->passwordmessages);
+                if($validator->fails()){
+                    return [
+                        'error' => $validator->messages()->get('*')
+                    ];
+                }else {
+                    $user = User::find(Auth::user()->id);
+                    if(Hash::check($request->oldpassword, $user->password)){
+                        $user->update([
+                            'password' => Hash::make($request->newpassword)
+                        ]);
+                        return [
+                            'success' => 'votre mot de passe à été changé avec succès'
+                        ];
+                    } else {
+                        return [
+                            'error' => [
+                                'oldpassword' => 'le mot de passe est incorrecte'
+                            ]
+                        ];
+                    }
+                }
+            } else if ($request->op == "modifier"){
+
+                if($request->nom){
+                    $validator = Validator::make($request->all(), $this->nomrule, $this->nommessages);
+                    $champ = "nom";
+                }
+                else if($request->prenom){
+                    $validator = Validator::make($request->all(), $this->prenomrule, $this->prenomessages);
+                    $champ = "prenom";
+                }
+                else if(property_exists((object) $request->all(), 'nom')){
+                    $validator = Validator::make($request->all(), $this->nomrule, $this->nommessages);
+                    $champ = "nom";
+                }
+                else if(property_exists((object) $request->all(), 'prenom')){
+                    $validator = Validator::make($request->all(), $this->prenomrule, $this->prenomessages);
+                    $champ = "prenom";
+                }
+                else if($request->email){
+                    $validator = Validator::make($request->all(), [
+                            'email' => 'required|email|unique:users,email,'.Auth::user()->id
+                    ], $this->emailmessages);
+                    $champ = "email";
+                }
+                else if($request->cin){
+                    $validator = Validator::make($request->all(), [
+                        'cin' => 'required|unique:users,cin,'.Auth::user()->id
+                    ], $this->cinmessages);
+                    $champ = "cin";
+                }
+
+                // checking the validator
+
+                if($validator->fails()){
+                    return [
+                        'error' => $validator->messages()->get('*')
+                    ];
+                } else {
+                    $user = User::find(Auth::user()->id)->update($request->except('op','_token'));
+                    return [
+                        'success' => 'le champ '.$champ.' est mis à jour'
+                    ];
+                }
+            }
+
+        } elseif($request->op == "image"){
+                // image request
+                $validator = Validator::make($request->all(), $this->imagerules, $this->imagemessages);
+                if($validator->fails()){
+                    dd($validator->messages()->get('*'));
+                } else {
+                    $imageName = time().'.'.$request->file->extension();
+                    $request->file->move(public_path('storage/images'), $imageName);
+                    User::find(Auth::user()->id)->update([
+                        'photo' => $imageName
+                    ]);
+                    return back()
+                            ->with('imagesuccess','You have successfully upload image.');
+                }
+        }
+
+    }
+    public function gestionprofProfile(Request $request){
+        if($request->ajax()){
+            if($request->op == "password"){
+                $validator = Validator::make($request->all() , $this->passwordrules, $this->passwordmessages);
+                if($validator->fails()){
+                    return [
+                        'error' => $validator->messages()->get('*')
+                    ];
+                }else {
+                    $user = User::find(Auth::user()->id);
+                    if(Hash::check($request->oldpassword, $user->password)){
+                        $user->update([
+                            'password' => Hash::make($request->newpassword)
+                        ]);
+                        return [
+                            'success' => 'votre mot de passe à été changé avec succès'
+                        ];
+                    } else {
+                        return [
+                            'error' => [
+                                'oldpassword' => 'le mot de passe est incorrecte'
+                            ]
+                        ];
+                    }
+                }
+            } else if ($request->op == "modifier"){
+
+                if($request->nom){
+                    $validator = Validator::make($request->all(), $this->nomrule, $this->nommessages);
+                    $champ = "nom";
+                }
+                else if($request->prenom){
+                    $validator = Validator::make($request->all(), $this->prenomrule, $this->prenomessages);
+                    $champ = "prenom";
+                }
+                else if(property_exists((object) $request->all(), 'nom')){
+                    $validator = Validator::make($request->all(), $this->nomrule, $this->nommessages);
+                    $champ = "nom";
+                }
+                else if(property_exists((object) $request->all(), 'prenom')){
+                    $validator = Validator::make($request->all(), $this->prenomrule, $this->prenomessages);
+                    $champ = "prenom";
+                }
+                else if($request->email){
+                    $validator = Validator::make($request->all(), [
+                            'email' => 'required|email|unique:users,email,'.Auth::user()->id
+                    ], $this->emailmessages);
+                    $champ = "email";
+                }
+                else if($request->cin){
+                    $validator = Validator::make($request->all(), [
+                        'cin' => 'required|unique:users,cin,'.Auth::user()->id
+                    ], $this->cinmessages);
+                    $champ = "cin";
+                }
+
+                // checking the validator
+
+                if($validator->fails()){
+                    return [
+                        'error' => $validator->messages()->get('*')
+                    ];
+                } else {
+                    $user = User::find(Auth::user()->id)->update($request->except('op','_token'));
+                    return [
+                        'success' => 'le champ '.$champ.' est mis à jour'
+                    ];
+                }
+            }
+
+        } elseif($request->op == "image"){
+                // image request
+                $validator = Validator::make($request->all(), $this->imagerules, $this->imagemessages);
+                if($validator->fails()){
+                    dd($validator->messages()->get('*'));
+                } else {
+                    $imageName = time().'.'.$request->file->extension();
+                    $request->file->move(public_path('storage/images'), $imageName);
+                    User::find(Auth::user()->id)->update([
+                        'photo' => $imageName
+                    ]);
+                    return back()
+                            ->with('imagesuccess','You have successfully upload image.');
+                }
+        }
+
+    }
+    public function gestionessProfile(Request $request){
+        if($request->ajax()){
+            if($request->op == "password"){
+                $validator = Validator::make($request->all() , $this->passwordrules, $this->passwordmessages);
+                if($validator->fails()){
+                    return [
+                        'error' => $validator->messages()->get('*')
+                    ];
+                }else {
+                    $user = User::find(Auth::user()->id);
+                    if(Hash::check($request->oldpassword, $user->password)){
+                        $user->update([
+                            'password' => Hash::make($request->newpassword)
+                        ]);
+                        return [
+                            'success' => 'votre mot de passe à été changé avec succès'
+                        ];
+                    } else {
+                        return [
+                            'error' => [
+                                'oldpassword' => 'le mot de passe est incorrecte'
+                            ]
+                        ];
+                    }
+                }
+            } else if ($request->op == "modifier"){
+
+                if($request->nom){
+                    $validator = Validator::make($request->all(), $this->nomrule, $this->nommessages);
+                    $champ = "nom";
+                }
+                else if($request->prenom){
+                    $validator = Validator::make($request->all(), $this->prenomrule, $this->prenomessages);
+                    $champ = "prenom";
+                }
+                else if(property_exists((object) $request->all(), 'nom')){
+                    $validator = Validator::make($request->all(), $this->nomrule, $this->nommessages);
+                    $champ = "nom";
+                }
+                else if(property_exists((object) $request->all(), 'prenom')){
+                    $validator = Validator::make($request->all(), $this->prenomrule, $this->prenomessages);
+                    $champ = "prenom";
+                }
+                else if($request->email){
+                    $validator = Validator::make($request->all(), [
+                            'email' => 'required|email|unique:users,email,'.Auth::user()->id
+                    ], $this->emailmessages);
+                    $champ = "email";
+                }
+                else if($request->cin){
+                    $validator = Validator::make($request->all(), [
+                        'cin' => 'required|unique:users,cin,'.Auth::user()->id
+                    ], $this->cinmessages);
+                    $champ = "cin";
+                }
+
+                // checking the validator
+
+                if($validator->fails()){
+                    return [
+                        'error' => $validator->messages()->get('*')
+                    ];
+                } else {
+                    $user = User::find(Auth::user()->id)->update($request->except('op','_token'));
+                    return [
+                        'success' => 'le champ '.$champ.' est mis à jour'
+                    ];
+                }
+            }
+
+        } elseif($request->op == "image"){
+                // image request
+                $validator = Validator::make($request->all(), $this->imagerules, $this->imagemessages);
+                if($validator->fails()){
+                    dd($validator->messages()->get('*'));
+                } else {
+                    $imageName = time().'.'.$request->file->extension();
+                    $request->file->move(public_path('storage/images'), $imageName);
+                    User::find(Auth::user()->id)->update([
+                        'photo' => $imageName
+                    ]);
+                    return back()
+                            ->with('imagesuccess','You have successfully upload image.');
+                }
+        }
+
+    }
+    public function gestioneseProfile(Request $request){
+        if($request->ajax()){
+            if($request->op == "password"){
+                $validator = Validator::make($request->all() , $this->passwordrules, $this->passwordmessages);
+                if($validator->fails()){
+                    return [
+                        'error' => $validator->messages()->get('*')
+                    ];
+                }else {
+                    $user = User::find(Auth::user()->id);
+                    if(Hash::check($request->oldpassword, $user->password)){
+                        $user->update([
+                            'password' => Hash::make($request->newpassword)
+                        ]);
+                        return [
+                            'success' => 'votre mot de passe à été changé avec succès'
+                        ];
+                    } else {
+                        return [
+                            'error' => [
+                                'oldpassword' => 'le mot de passe est incorrecte'
+                            ]
+                        ];
+                    }
+                }
+            } else if ($request->op == "modifier"){
+
+                if($request->nom){
+                    $validator = Validator::make($request->all(), $this->nomrule, $this->nommessages);
+                    $champ = "nom";
+                }
+                else if($request->prenom){
+                    $validator = Validator::make($request->all(), $this->prenomrule, $this->prenomessages);
+                    $champ = "prenom";
+                }
+                else if(property_exists((object) $request->all(), 'nom')){
+                    $validator = Validator::make($request->all(), $this->nomrule, $this->nommessages);
+                    $champ = "nom";
+                }
+                else if(property_exists((object) $request->all(), 'prenom')){
+                    $validator = Validator::make($request->all(), $this->prenomrule, $this->prenomessages);
+                    $champ = "prenom";
+                }
+                else if($request->email){
+                    $validator = Validator::make($request->all(), [
+                            'email' => 'required|email|unique:users,email,'.Auth::user()->id
+                    ], $this->emailmessages);
+                    $champ = "email";
+                }
+                else if($request->cin){
+                    $validator = Validator::make($request->all(), [
+                        'cin' => 'required|unique:users,cin,'.Auth::user()->id
+                    ], $this->cinmessages);
+                    $champ = "cin";
+                }
+
+                // checking the validator
+
+                if($validator->fails()){
+                    return [
+                        'error' => $validator->messages()->get('*')
+                    ];
+                } else {
+                    $user = User::find(Auth::user()->id)->update($request->except('op','_token'));
+                    return [
+                        'success' => 'le champ '.$champ.' est mis à jour'
+                    ];
+                }
+            }
+
+        } elseif($request->op == "image"){
+                // image request
+                $validator = Validator::make($request->all(), $this->imagerules, $this->imagemessages);
+                if($validator->fails()){
+                    dd($validator->messages()->get('*'));
+                } else {
+                    $imageName = time().'.'.$request->file->extension();
+                    $request->file->move(public_path('storage/images'), $imageName);
+                    User::find(Auth::user()->id)->update([
+                        'photo' => $imageName
+                    ]);
+                    return back()
+                            ->with('imagesuccess','You have successfully upload image.');
+                }
+        }
+
+    }
+  
 }

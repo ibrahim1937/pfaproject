@@ -560,7 +560,7 @@ class AdminController extends Controller
     public function gestionlogs(Request $request){
         if($request->ajax()){
             if($request->op == 'afficher'){
-                return AdminHelper::getLogs(Log::all());
+                return AdminHelper::getLogs(Log::select('logs.*')->join('users','users.id', '=', 'logs.id_user')->where('role_id', '!=', 1)->orderBy('updated_at', 'desc')->get());
                 
             } else if($request->op == 'filtre'){
                 return AdminHelper::filtrelogs($request->filtreOp , $request->except('_token', 'op','filtreOp'));

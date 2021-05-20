@@ -18,17 +18,53 @@
         rel="stylesheet">
 
     <!-- Custom styles for this template-->
+    <link rel="stylesheet" type="text/css" href="{{ asset('css/style3.css') }}">
     <link href="{{ asset('css/sb-admin-2.css') }}" rel="stylesheet">
     <link href="{{ asset('css/boostrap.min.css') }}" rel="stylesheet">
 
 </head>
 
-<body class="bg-gradient-primary">
+<body>
 
-    <div class="container">
+        <div class="container">
+            <div class="img">
+                <img src="{{ asset('loginfiles/img/aa.jpg')}}">
+            </div>
+            <div class="login-content">
+                <form class="user" action="{{ route('forgetpassword') }}" method="post" id="forgetform">
+                    @csrf
+                    {{-- <img src="{{ asset('loginfiles/img/avatar.svg')}}"> --}}
+                    <h2 class="title">vous pouvez récupérer votre compte</h2>
+                       <div class="input-div one">
+                          <div class="i">
+                                  <i class="fas fa-user"></i>
+                          </div>
+                          <div class="div">
+                                  <h5>Email</h5>
+                                  <input type="email" class="input" id="email" name="email">
+
+                          </div>
+                    </div>
+
+                          @error('email')
+
+                                <span class="text text-danger-center" style="display: inline;color:red;">
+                                    {{ $message }}</span>
+
+                         @enderror
+
+
+
+                    <button type="submit" class="btn btn-primary btn-user btn-block">
+                        Chercher
+                    </button>
+                    <a class="small" href="{{ route('loginpage') }}">Vous avez déjà un compte? s'identifier!</a>
+                </form>
+            </div>
+        </div>
 
         <!-- Outer Row -->
-        <div class="row justify-content-center">
+        {{-- <div class="row justify-content-center">
 
             <div class="col-xl-10 col-lg-12 col-md-9">
 
@@ -67,15 +103,15 @@
 
             </div>
 
-        </div>
+        </div> --}}
 
-    </div>
 
     <script src="{{ asset('js/jquery-3.6.0.js') }}"></script>
   <script>
       var forgetpassword = "{{ route('forgetpassword') }}";
   </script>
   <script src="{{ asset('js/forgetpassword.js') }}"></script>
+  <script type="text/javascript" src="{{ asset('loginfiles/js/main.js') }}"></script>
 
 </body>
 

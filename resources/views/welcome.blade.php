@@ -23,7 +23,7 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css">
   <link href="{{ asset('css/style.css') }}" rel="stylesheet">
 
-  
+
 </head>
 
 <body>
@@ -63,7 +63,7 @@
         <div class="carousel-item active" style="background-image: url({{ asset('storage/images/slide/1.jpg') }})">
           <div class="carousel-container">
             <div class="container">
-              <h2 class="animate__animated animate__fadeInDown">Welcome to <span>Services de scolarité</span></h2>
+              <h2 class="animate__animated animate__fadeInDown">Bienvenue dans <span>Services de scolarité</span></h2>
               <p class="animate__animated animate__fadeInUp">Les services de scolarité sont des lieux de contacts privilégiés entre les étudiant·e·s et l’université. Si vous étudiez dans un IUT, certaines des missions suivantes sont assurées par les secrétariats des départements.</p>
               <a href="#about" class="btn-get-started animate__animated animate__fadeInUp scrollto">Read More</a>
             </div>
@@ -71,7 +71,7 @@
         </div>
 
         <!-- Slide 2 -->
-        <div class="carousel-item" style="background-image: url(assets/img/slide/2.jpg)">
+        <div class="carousel-item" style="background-image: url({{ asset('storage/images/slide/2.jpg') }})">
           <div class="carousel-container">
             <div class="container">
               <h2 class="animate__animated animate__fadeInDown">Accueillir et informer</h2>
@@ -80,9 +80,8 @@
             </div>
           </div>
         </div>
-
         <!-- Slide 3 -->
-        <div class="carousel-item" style="background-image: url(assets/img/slide/3.jpg)">
+        <div class="carousel-item" style="background-image: url({{ asset('storage/images/slide/3.jpg') }})">
           <div class="carousel-container">
             <div class="container">
               <h2 class="animate__animated animate__fadeInDown">Aider les étudiantes</h2>
@@ -108,7 +107,7 @@
   <main id="main">
 
     <!-- ======= Featured Services Section ======= -->
-    
+
 
     <!-- ======= About Us Section ======= -->
     <section id="about" class="about">
@@ -177,7 +176,7 @@
               <h4>Ibrahim chahboun</h4>
               <span>Etudiant Ensaj</span>
               <p>
-                occupe de cote designer et des managements des pages de site service de scolarite 
+                occupe de cote designer et des managements des pages de site service de scolarite
               </p>
               <div class="social">
                 <a href=""><i class="bi bi-facebook"></i></a>

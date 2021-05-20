@@ -65,7 +65,7 @@ class Kernel extends HttpKernel
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'session.timeout' => \App\Http\Middleware\SessionTimeout::class,
         'admin' => \App\Http\Middleware\AdminMiddleware::class,
-        'etudiant' => \App\Http\Middleware\AdminMiddleware::class,
+        'etudiant' => \App\Http\Middleware\EtudiantMiddleware::class,
         'professeur' => \App\Http\Middleware\ProfesseurMiddleware::class,
         'agentscolarite' => \App\Http\Middleware\AgentScolariteMiddleware::class,
         'agentexamen' => \App\Http\Middleware\AgentExamenMiddleware::class,

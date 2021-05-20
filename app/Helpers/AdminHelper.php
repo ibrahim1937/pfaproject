@@ -532,16 +532,33 @@ class AdminHelper {
         $result = array();
         foreach($logs as $log){
             $user = User::find($log->id_user);
-
-            $temp = [
-                'id' => $log->id,
-                'nom' => $user->nom,
-                'prenom' => $user->prenom,
-                'date_depart' => Carbon::parse($log->created_at)->format('d-m-Y H:i:s'),
-                'date_fin' => Carbon::parse($log->updated_at)->format('d-m-Y H:i:s'),
-                'activity' => count(Activities::where('id_log', $log->id)->get()) ? Activities::where('id_log', $log->id)->get() : 'aucune activité'
-            ];
-            array_push($result, $temp);
+            $activities = Activities::where('id_log', $log->id)->get();
+            if(count($activities)){
+                foreach( $activities as $ac){
+                    $temp = [
+                        'id' => $log->id,
+                        'nom' => $user->nom,
+                        'prenom' => $user->prenom,
+                        'date_depart' => Carbon::parse($log->created_at)->format('d-m-Y H:i:s'),
+                        'date_fin' => Carbon::parse($log->updated_at)->format('d-m-Y H:i:s'),
+                        'activity' => $ac->activity
+                    ];
+                    array_push($result, $temp);
+                }
+            } else {
+                $temp = [
+                    'id' => $log->id,
+                    'nom' => $user->nom,
+                    'prenom' => $user->prenom,
+                    'date_depart' => Carbon::parse($log->created_at)->format('d-m-Y H:i:s'),
+                    'date_fin' => Carbon::parse($log->updated_at)->format('d-m-Y H:i:s'),
+                    'activity' => 'aucune activité'
+                ];
+                array_push($result, $temp);
+            }
+            
+            
+            
         }
         return $result;
     }
@@ -561,6 +578,7 @@ class AdminHelper {
                 ->join('users', 'users.id', '=', 'etudiants.id_user')
                 ->where('etudiants.id', $entries['id_etudiant'])
                 ->select('logs.*')
+                ->orderBy('updated_at', 'desc')
                 ->get();
             } else if (array_key_exists('id_filiere', $entries)){
                 $logs =  DB::table('logs')
@@ -568,12 +586,14 @@ class AdminHelper {
                 ->join('users', 'users.id', '=', 'etudiants.id_user')
                 ->where('etudiants.id_filiere', $entries['id_filiere'])
                 ->select('logs.*')
+                ->orderBy('updated_at', 'desc')
                 ->get();
             } else {
                 $logs =  DB::table('logs')
                 ->join('etudiants', 'etudiants.id_user', '=', 'logs.id_user')
                 ->join('users', 'users.id', '=', 'etudiants.id_user')
                 ->select('logs.*')
+                ->orderBy('updated_at', 'desc')
                 ->get();
             }   
             return AdminHelper::getLogs($logs);
@@ -613,12 +633,14 @@ class AdminHelper {
                 ->join('users', 'users.id', '=', 'agent_scolarites.id_user')
                 ->where('agent_scolarites.id', $entries['id_agentscolarite'])
                 ->select('logs.*')
+                ->orderBy('updated_at', 'desc')
                 ->get();
             } else {
                 $logs =  DB::table('logs')
                 ->join('agent_scolarites', 'agent_scolarites.id_user', '=', 'logs.id_user')
                 ->join('users', 'users.id', '=', 'agent_scolarites.id_user')
                 ->select('logs.*')
+                ->orderBy('updated_at', 'desc')
                 ->get();
             }
 
@@ -637,12 +659,14 @@ class AdminHelper {
                 ->join('users', 'users.id', '=', 'agent_examens.id_user')
                 ->where('agent_examens.id', $entries['id_agentexamen'])
                 ->select('logs.*')
+                ->orderBy('updated_at', 'desc')
                 ->get();
             } else {
                 $logs =  DB::table('logs')
                 ->join('agent_examens', 'agent_examens.id_user', '=', 'logs.id_user')
                 ->join('users', 'users.id', '=', 'agent_examens.id_user')
                 ->select('logs.*')
+                ->orderBy('updated_at', 'desc')
                 ->get();
             }
 
@@ -661,6 +685,7 @@ class AdminHelper {
                     ->where('etudiants.id', $entries['id_etudiant'])
                     ->whereDate('logs.created_at', Carbon::parse($entries['date'])->format('Y-m-d'))
                     ->select('logs.*')
+                    ->orderBy('updated_at', 'desc')
                     ->get();
 
                     return AdminHelper::getLogs($logs);
@@ -671,6 +696,7 @@ class AdminHelper {
                     ->where('etudiants.id_filiere', $entries['id_filiere'])
                     ->whereDate('logs.created_at', Carbon::parse($entries['date'])->format('Y-m-d'))
                     ->select('logs.*')
+                    ->orderBy('updated_at', 'desc')
                     ->get();
                     return AdminHelper::getLogs($logs);
                 } else {
@@ -679,6 +705,7 @@ class AdminHelper {
                     ->join('users', 'users.id', '=', 'etudiants.id_user')
                     ->whereDate('logs.created_at', Carbon::parse($entries['date'])->format('Y-m-d'))
                     ->select('logs.*')
+                    ->orderBy('updated_at', 'desc')
                     ->get();
                     return AdminHelper::getLogs($logs);
                 }
@@ -690,6 +717,7 @@ class AdminHelper {
                     ->where('professeurs.id', $entries['id_prof'])
                     ->whereDate('logs.created_at', Carbon::parse($entries['date'])->format('Y-m-d'))
                     ->select('logs.*')
+                    ->orderBy('updated_at', 'desc')
                     ->get();
                     return AdminHelper::getLogs($logs);
                 } else if(array_key_exists('date', $entries)){
@@ -698,6 +726,7 @@ class AdminHelper {
                     ->join('users', 'users.id', '=', 'professeurs.id_user')
                     ->whereDate('logs.created_at', Carbon::parse($entries['date'])->format('Y-m-d'))
                     ->select('logs.*')
+                    ->orderBy('updated_at', 'desc')
                     ->get();
                     return AdminHelper::getLogs($logs);
                 }
@@ -709,6 +738,7 @@ class AdminHelper {
                     ->where('agent_scolarites.id', $entries['id_agentscolarite'])
                     ->whereDate('logs.created_at', Carbon::parse($entries['date'])->format('Y-m-d'))
                     ->select('logs.*')
+                    ->orderBy('updated_at', 'desc')
                     ->get();
                     return AdminHelper::getLogs($logs);
                 } else if(array_key_exists('date', $entries)){
@@ -717,6 +747,7 @@ class AdminHelper {
                     ->join('users', 'users.id', '=', 'agent_scolarites.id_user')
                     ->whereDate('logs.created_at', Carbon::parse($entries['date'])->format('Y-m-d'))
                     ->select('logs.*')
+                    ->orderBy('updated_at', 'desc')
                     ->get();
                     return AdminHelper::getLogs($logs);
                 }
@@ -729,6 +760,7 @@ class AdminHelper {
                     ->where('agent_examens.id', $entries['id_agentexamen'])
                     ->whereDate('logs.created_at', Carbon::parse($entries['date'])->format('Y-m-d'))
                     ->select('logs.*')
+                    ->orderBy('updated_at', 'desc')
                     ->get();
                 } else if(array_key_exists('date', $entries)) {
                     $logs =  DB::table('logs')
@@ -736,6 +768,7 @@ class AdminHelper {
                     ->join('users', 'users.id', '=', 'agent_examens.id_user')
                     ->whereDate('logs.created_at', Carbon::parse($entries['date'])->format('Y-m-d'))
                     ->select('logs.*')
+                    ->orderBy('updated_at', 'desc')
                     ->get();
                 }
                 return AdminHelper::getLogs($logs);
@@ -750,18 +783,22 @@ class AdminHelper {
                 ->where('logs.updated_at', '<=', Carbon::parse($entries['date_fin'])->format('Y-m-d H:i:s'))
                 ->where('etudiants.id', $entries['id_etudiant'])
                 ->select('logs.*')
+                ->orderBy('updated_at', 'desc')
                 ->get();
 
                 return AdminHelper::getLogs($logs);
 
-                } else if(array_key_exists('date_debut', $entries) && array_key_exists('date_fin', $entries) && array_key_exists('id_filiere', $entries)){
-                    $logs =  DB::table('logs')
+                } 
+                else if(array_key_exists('date_debut', $entries) && array_key_exists('date_fin', $entries) && array_key_exists('id_filiere', $entries))
+                {
+                $logs =  DB::table('logs')
                 ->join('etudiants', 'etudiants.id_user', '=', 'logs.id_user')
                 ->join('users', 'users.id', '=', 'etudiants.id_user')
                 ->where('etudiants.id_filiere', $entries['id_filiere'])
                 ->where('logs.created_at', '>=', Carbon::parse($entries['date_debut'])->format('Y-m-d H:i:s'))
                 ->where('logs.updated_at', '<=', Carbon::parse($entries['date_fin'])->format('Y-m-d H:i:s'))
                 ->select('logs.*')
+                ->orderBy('updated_at', 'desc')
                 ->get();
                 return AdminHelper::getLogs($logs);
                 }else {
@@ -771,6 +808,7 @@ class AdminHelper {
                     ->where('logs.created_at', '>=', Carbon::parse($entries['date_debut'])->format('Y-m-d H:i:s'))
                     ->where('logs.updated_at', '<=', Carbon::parse($entries['date_fin'])->format('Y-m-d H:i:s'))
                     ->select('logs.*')
+                    ->orderBy('updated_at', 'desc')
                     ->get();
                     return AdminHelper::getLogs($logs);
                 }
@@ -782,7 +820,7 @@ class AdminHelper {
                     ->where('logs.created_at', '>=', Carbon::parse($entries['date_debut'])->format('Y-m-d H:i:s'))
                     ->where('logs.updated_at', '<=', Carbon::parse($entries['date_fin'])->format('Y-m-d H:i:s'))
                     ->where('professeurs.id', $entries['id_prof'])
-                    ->select('logs.*')
+                    ->orderBy('updated_at', 'desc')
                     ->get();
                     return AdminHelper::getLogs($logs);
 
@@ -793,6 +831,7 @@ class AdminHelper {
                     ->where('logs.created_at', '>=', Carbon::parse($entries['date_debut'])->format('Y-m-d H:i:s'))
                     ->where('logs.updated_at', '<=', Carbon::parse($entries['date_fin'])->format('Y-m-d H:i:s'))
                     ->select('logs.*')
+                    ->orderBy('updated_at', 'desc')
                     ->get();
                     return AdminHelper::getLogs($logs);
                 }
@@ -805,6 +844,7 @@ class AdminHelper {
                     ->where('logs.updated_at', '<=', Carbon::parse($entries['date_fin'])->format('Y-m-d H:i:s'))
                     ->where('agent_scolarites.id', $entries['id_agentscolarite'])
                     ->select('logs.*')
+                    ->orderBy('updated_at', 'desc')
                     ->get();
                     return AdminHelper::getLogs($logs);
 
@@ -815,6 +855,7 @@ class AdminHelper {
                     ->where('logs.created_at', '>=', Carbon::parse($entries['date_debut'])->format('Y-m-d H:i:s'))
                     ->where('logs.updated_at', '<=', Carbon::parse($entries['date_fin'])->format('Y-m-d H:i:s'))
                     ->select('logs.*')
+                    ->orderBy('updated_at', 'desc')
                     ->get();
                     return AdminHelper::getLogs($logs);
                 }
@@ -828,6 +869,7 @@ class AdminHelper {
                     ->where('logs.updated_at', '<=', Carbon::parse($entries['date_fin'])->format('Y-m-d H:i:s'))
                     ->where('agent_examens.id', $entries['id_agentexamen'])
                     ->select('logs.*')
+                    ->orderBy('updated_at', 'desc')
                     ->get();
                     return AdminHelper::getLogs($logs);
 
@@ -838,6 +880,7 @@ class AdminHelper {
                     ->where('logs.created_at', '>=', Carbon::parse($entries['date_debut'])->format('Y-m-d H:i:s'))
                     ->where('logs.updated_at', '<=', Carbon::parse($entries['date_fin'])->format('Y-m-d H:i:s'))
                     ->select('logs.*')
+                    ->orderBy('updated_at', 'desc')
                     ->get();
                     return AdminHelper::getLogs($logs);
                 }
